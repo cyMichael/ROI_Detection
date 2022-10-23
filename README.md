@@ -8,10 +8,73 @@ Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whol
 
 ## Overview
 
+Automated region of interest detection in histopathological image analysis is a challenging and important topic with tremendous potential impact on clinical practice. The deep-learning methods used in computational pathology help us to reduce costs and increase the speed and accuracy of regions of interest detection and cancer diagnosis. In this work, we proposed a patch-based region of interest detection method for melanocytic skin tumor whole-slide images. We worked with a dataset that contains 165 primary *melanomas* and *nevi* Hematoxylin and Eosin whole-slide images and built a deep-learning method. The proposed method performed well on a hold-out test dataset including five TCGA-SKCM slides (accuracy of 93.94% in the slide classification task and intersection over union rate of 41.27% in the region of interest detection task), showing the outstanding performance of our model on melanocytic skin tumor. Even though we tested the experiments on the skin tumor dataset, our work could also be extended to other medical image detection problems, such as various tumors' classification and prediction, to benefit the clinical evaluation and diagnosis of different tumors.
+
+![plot](./pics/task.jpg)
+
+## Setup
+
+### 1. Computational configuration
+
+- All analyses were used by Python. Images were analyzed and processed using OpenSlide. 
+- All the computational tasks were finished on UNC Longleaf Cluster with Linux (Tested on Ubuntu 18.04) and NVIDIA GPU (Tested on Nvidia GeForce RTX 3090 on local workstations). 
+- CUDA (Tested on CUDA 11.3) 
+- torch>=1.7.1.
+
+### 2. Basic Structure of Codes
 
 
 
 
 
+You need to generate a csv file that contains 'slide_id', 'data_split', 'label' for training the model.
 
-Notes: Modified by the version from https://github.com/roidetection/roi_detection
+
+
+### 3. Training and Region of Interest Detection
+
+Here are example commands for training the patch classification model and performing ROI detection.
+
+#### Train Patch Classification Model (PCLA-3C)
+
+Step 0: color normalization.
+
+Step 1: patch extraction: extracting patches from whole slide images with annotation files (.xml). Depending on the annotations, the extracted patches may belong to different classes. Save patches to corresponding directories (train/val/test) based on csv file.
+
+```python
+python extract_patches_3class.py --data_dir PATH_TO_SAVE_MEL/patches_all_norm/patches --csv_path PATH_TO_CSV --xml_annotation_new PATH_TO_SAVE_ANNOTATED_PATCHES/annotations_new --xml_annotation_other PATH_TO_SAVE_ANNOTATED_PATCHES/annotations_other --feat_dir PATH_TO_SAVE_FEATURES/features
+```
+
+Step 2: train patch classification model (PCLA-3C).
+
+```python
+python method_pcla_3class.py --exp_name 'pcla_3class' --data_folder PATH_TO_SAVE_FEATURES --batch_size 100 --n_epochs 20 
+```
+
+Step 3: calculate predicted scores for all extracted patches.
+
+```python
+python score_pcla_3class.py --exp_name 'pcla_3class' --auto_skip --model_load TRAINED_MODEL --csv_path PATH_TO_CSV --patch_path PATH_TO_ALL_FEATURES --results_dir PATH_TO_SAVE_RESULTS --classification_save_dir PATH_TO_SAVE_CLASSIFICATION_RESULTS
+```
+
+Step 4: generate overlap map.
+
+```python
+python visual.py --auto_skip --exp_name 'pcla_3class' --csv_path PATH_TO_CSV --wsi_dir PATH_TO_WSI --results_dir PATH_TO_SAVE_RESULTS --xml_dir PATH_TO_GROUND_TRUTH_LABELS
+```
+
+By setting `--heatmap` or `--boundary`, other two types of visualization results can also be generated.
+
+## Reproducibility
+
+The melanocytic skin tumor dataset will be made public in the future. To reproduce the results on TCGA-SKCM dataset, the pretrained model is available at [model]() (for anonymization, the link will be provided after paper review).
+
+## Issues
+
+- Please report all issues on the public forum.
+
+## Acknowledgments
+
+- This version is modified by the version from https://github.com/roidetection/roi_detection.
+
+- This code of patch extraction is inspired by [CLAM](https://github.com/mahmoodlab/CLAM).
