@@ -12,21 +12,21 @@ Automated region of interest detection in histopathological image analysis is a 
 
 ![plot](./pics/task.jpg)
 
-<center>Heatmap<center>
+<center>ROI was annotated by black dots determined by pathologists. The predicted ROI was bounded by the green line on the right.<center>
 
 Here is the flowchart for our paper:
 
 ![plot](./flowchart/flowchart.png)
 
-<center>Flowchart of the paper<center>
+<center>Overview of the proposed detection framework. a) Extract melanoma, nevus and other patches from training data. b) Train a 3-class patch classifier based on extracted patches. c) For each slide, generate predicted scores for all patches and calculate patch as well as slide classification accuracy. d) Rank all patches from a slide based on the corresponding predicted scores in the context of melanoma or nevus, depending on the slide classification result. e) Generate visualization results based on predicted scores.<center>
 
 ## Setup
 
-### 1. Computational configuration
+### 1. Computational Configuration
 
 - All analyses were used by Python. Images were analyzed and processed using OpenSlide. 
 - All the computational tasks were finished on UNC Longleaf Cluster with Linux (Tested on Ubuntu 18.04) and NVIDIA GPU (Tested on Nvidia GeForce RTX 3090 on local workstations). 
-- CUDA (Tested on CUDA 11.3) 
+- CUDA (Tested on CUDA 11.3).
 - torch>=1.7.1.
 
 ### 2. Basic Structure of Codes
@@ -35,6 +35,7 @@ Here is the flowchart for our paper:
 - **method_pcla_3class.py**: train patch classification model on annotated patches (PCLA-3C).
 - **score_pcla_3class.py**: compute predicted scores for all patches from WSI with the trained model.
 - **visual.py**: generate visualization maps (heatmap, overlay, boundary).
+- **analysis.py**: calculate the IoU value
 
 You need to generate a CSV file that contains 'slide_id', 'data_split', and 'label' for training the model.
 
@@ -46,16 +47,16 @@ Here are example commands for training the patch classification model and perfor
 
 Step 0: color normalization.
 
-Step 1: patch extraction: extracting patches from whole slide images with annotation files (.xml). Depending on the annotations, the extracted patches may belong to different classes. Save patches to corresponding directories (train/val/test) based on csv file.
+Step 1: patch extraction: extracting patches from whole slide images with annotation files (.xml). Depending on the annotations, the extracted patches may belong to different classes. Save patches to corresponding directories (train/val/test) based on CSV file.
 
 ```python
-python extract_patches_3class.py --data_dir PATH_TO_SAVE_MEL/patches_all_norm/patches --csv_path PATH_TO_CSV --xml_annotation_new PATH_TO_SAVE_ANNOTATED_PATCHES/annotations_new --xml_annotation_other PATH_TO_SAVE_ANNOTATED_PATCHES/annotations_other --feat_dir PATH_TO_SAVE_FEATURES/features
+python extract_patches_3class.py --data_dir PATH_TO_SAVE_MEL/PATCHES --csv_path PATH_TO_CSV --xml_annotation_new PATH_TO_SAVE_ANNOTATED_PATCHES/ANNOTATIONS_NEW --xml_annotation_other PATH_TO_SAVE_ANNOTATED_PATCHES/ANNOTATIONS_OTHER --feat_dir PATH_TO_SAVE_FEATURES
 ```
 
 Step 2: train patch classification model (PCLA-3C).
 
 ```python
-python method_pcla_3class.py --exp_name 'pcla_3class' --data_folder PATH_TO_SAVE_FEATURES --batch_size 100 --n_epochs 20 
+python method_pcla_3class.py --exp_name 'pcla_3class' --data_folder PATH_TO_SAVE_FEATURES --batch_size 100 --n_epochs 20
 ```
 
 Step 3: calculate predicted scores for all extracted patches.
@@ -67,10 +68,16 @@ python score_pcla_3class.py --exp_name 'pcla_3class' --auto_skip --model_load TR
 Step 4: generate an overlap map.
 
 ```python
-python visual.py --auto_skip --exp_name 'pcla_3class' --csv_path PATH_TO_CSV --wsi_dir PATH_TO_WSI --results_dir PATH_TO_SAVE_RESULTS --xml_dir PATH_TO_GROUND_TRUTH_LABELS
+python visual.py --auto_skip --percent PERCENT_NUMBER --xml_dir PATH_TO_XML --exp_name 'pcla_3class' --csv_path PATH_TO_CSV --wsi_dir PATH_TO_WSI --results_dir PATH_TO_SAVE_RESULTS --xml_dir PATH_TO_GROUND_TRUTH_LABELS --annotation_ratio ANNOTATION_NUMBER
 ```
 
-By setting `--heatmap` or `--boundary`, other two types of visualization results can also be generated.
+By setting `--heatmap` or `--boundary`, the other two types of visualization results can also be generated.
+
+Step 5: calculate the IoU value.
+
+```python
+python analysis.py --results_dir RESULT_TO_CSV --csv_dir PATH_TO_CSV
+```
 
 ### 4. Visualization Examples
 
