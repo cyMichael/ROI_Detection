@@ -12,6 +12,14 @@ Automated region of interest detection in histopathological image analysis is a 
 
 ![plot](./pics/task.jpg)
 
+<center>Heatmap<center>
+
+Here is the flowchart for our paper:
+
+![plot](./flowchart/flowchart.png)
+
+<center>Flowchart of the paper<center>
+
 ## Setup
 
 ### 1. Computational configuration
@@ -23,13 +31,12 @@ Automated region of interest detection in histopathological image analysis is a 
 
 ### 2. Basic Structure of Codes
 
+- **extract_patches_3class.py**: extract patches from whole slide images with annotation files (.xml). Split annotated patches into training, testing and validation. 
+- **method_pcla_3class.py**: train patch classification model on annotated patches (PCLA-3C).
+- **score_pcla_3class.py**: compute predicted scores for all patches from WSI with the trained model.
+- **visual.py**: generate visualization maps (heatmap, overlay, boundary).
 
-
-
-
-You need to generate a csv file that contains 'slide_id', 'data_split', 'label' for training the model.
-
-
+You need to generate a CSV file that contains 'slide_id', 'data_split', and 'label' for training the model.
 
 ### 3. Training and Region of Interest Detection
 
@@ -57,7 +64,7 @@ Step 3: calculate predicted scores for all extracted patches.
 python score_pcla_3class.py --exp_name 'pcla_3class' --auto_skip --model_load TRAINED_MODEL --csv_path PATH_TO_CSV --patch_path PATH_TO_ALL_FEATURES --results_dir PATH_TO_SAVE_RESULTS --classification_save_dir PATH_TO_SAVE_CLASSIFICATION_RESULTS
 ```
 
-Step 4: generate overlap map.
+Step 4: generate an overlap map.
 
 ```python
 python visual.py --auto_skip --exp_name 'pcla_3class' --csv_path PATH_TO_CSV --wsi_dir PATH_TO_WSI --results_dir PATH_TO_SAVE_RESULTS --xml_dir PATH_TO_GROUND_TRUTH_LABELS
@@ -65,9 +72,41 @@ python visual.py --auto_skip --exp_name 'pcla_3class' --csv_path PATH_TO_CSV --w
 
 By setting `--heatmap` or `--boundary`, other two types of visualization results can also be generated.
 
+### 4. Visualization Examples
+
+Here are some examples of the melanoma sample and nevus sample.
+
+#### Visualization results for a melanoma sample.
+
+![plot](./visual_examples/mela_con.png)
+
+<center>Boundary<center>
+
+![plot](./visual_examples/mela_heat.png)
+
+<center>Heatmap<center>
+
+![plot](./visual_examples/mela_over.png)
+
+<center>Overlay<center>
+
+#### Visualization results for a nevus sample.
+
+![plot](./visual_examples/nev_con.png)
+
+<center>Boundary<center>
+
+![plot](./visual_examples/nev_heat.png)
+
+<center>Heatmap<center>
+
+![plot](./visual_examples/nev_over.png)
+
+<center>Overlay<center>
+
 ## Reproducibility
 
-The melanocytic skin tumor dataset will be made public in the future. To reproduce the results on TCGA-SKCM dataset, the pretrained model is available at [model]() (for anonymization, the link will be provided after paper review).
+The melanocytic skin tumor dataset will be made public in the future. To reproduce the results on the TCGA-SKCM dataset, the pre-trained model is available at the [model]() (for anonymization, the link will be provided after the paper review).
 
 ## Issues
 
