@@ -35,7 +35,7 @@ Here is the flowchart for our paper:
 - **method_pcla_3class.py**: train patch classification model on annotated patches (PCLA-3C).
 - **score_pcla_3class.py**: compute predicted scores for all patches from WSI with the trained model.
 - **visual.py**: generate visualization maps (heatmap, overlay, boundary).
-- **analysis.py**: calculate the IoU value
+- **analysis.py**: calculate the IoU value.
 
 You need to generate a CSV file that contains 'slide_id', 'data_split', and 'label' for training the model.
 
