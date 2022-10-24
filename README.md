@@ -1,6 +1,6 @@
 # Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images [![Open in Visual Studio Code](vscode.svg)](https://code.visualstudio.com/)
 
-[<img src="TCGA1.gif" width="470px" align="left" />](https://github.com/cyMichael/ROI_Detection)Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images
+[<img src="TCGA1.gif" width="470px" align="left" />](https://github.com/cyMichael/ROI_Detection)Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images. Model: **PCLA-3C**
 
 ## Updates
 
@@ -8,7 +8,7 @@
 
 
 
-[Overview](#Overview)•[Setup](#Setup)••••
+[Overview](#Overview)•[Setup](#Setup)•[Training and Region of Interest Detection](#Training and Region of Interest Detection)•[Visualization Examples](#Visualization Examples)•[Reproducibility](#Reproducibility)•[Issues](#Issues)•[Acknowledgments](#Acknowledgments)
 
 ## Overview
 
@@ -23,7 +23,6 @@ Here is the flowchart for our paper:
 ![plot](./flowchart/flowchart.png)
 
 <center>Overview of the proposed detection framework. a) Extract melanoma, nevus and other patches from training data. b) Train a 3-class patch classifier based on extracted patches. c) For each slide, generate predicted scores for all patches and calculate patch as well as slide classification accuracy. d) Rank all patches from a slide based on the corresponding predicted scores in the context of melanoma or nevus, depending on the slide classification result. e) Generate visualization results based on predicted scores.<center>
-
 ## Setup
 
 ### 1. Computational Configuration
@@ -43,7 +42,7 @@ Here is the flowchart for our paper:
 
 You need to generate a CSV file that contains 'slide_id', 'data_split', and 'label' for training the model.
 
-### 3. Training and Region of Interest Detection
+## Training and Region of Interest Detection
 
 Here are example commands for training the patch classification model and performing ROI detection.
 
@@ -83,7 +82,7 @@ Step 5: calculate the IoU value.
 python analysis.py --results_dir RESULT_TO_CSV --csv_dir PATH_TO_CSV
 ```
 
-### 4. Visualization Examples
+## Visualization Examples
 
 Here are some examples of the melanoma sample and nevus sample.
 
@@ -114,7 +113,6 @@ Here are some examples of the melanoma sample and nevus sample.
 ![plot](./visual_examples/nev_over.png)
 
 <center>Overlay<center>
-
 ## Reproducibility
 
 The melanocytic skin tumor dataset will be made public in the future. To reproduce the results on the TCGA-SKCM dataset, the pre-trained model is available at the [model]() (for anonymization, the link will be provided after the paper review).
