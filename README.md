@@ -10,7 +10,7 @@ Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whol
 
 
 
-[Overview](#Overview)•[Setup](#Setup)•[Training and Region of Interest Detection](#Training and Region of Interest Detection)•[Visualization Examples](#Visualization Examples)•[Reproducibility](#Reproducibility)•[Issues](#Issues)•[Acknowledgments](#Acknowledgments)
+[Overview](#Overview)•[Setup](#Setup)•[Training and Region of Interest Detection](# Training and Region of Interest Detection)•[Visualization Examples](# Visualization Examples)•[Reproducibility](#Reproducibility)•[Issues](#Issues)•[Acknowledgments](#Acknowledgments)
 
 ## Overview
 
