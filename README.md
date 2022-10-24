@@ -10,7 +10,7 @@ Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whol
 
 
 
-[Overview](#Overview)•[Setup](#Setup)•[Training](#Training and Region of Interest Detection)•[Visualization Examples](# Visualization Examples)•[Reproducibility](#Reproducibility)•[Issues](#Issues)•[Acknowledgments](#Acknowledgments)
+[Overview](#Overview)•[Setup](#Setup)•[Training](#Training)•[Visualization Examples](# Visualization Examples)•[Reproducibility](#Reproducibility)•[Issues](#Issues)•[Acknowledgments](#Acknowledgments)
 
 ## Overview
 
@@ -44,7 +44,9 @@ Here is the flowchart for our paper:
 
 You need to generate a CSV file that contains 'slide_id', 'data_split', and 'label' for training the model.
 
-## Training and Region of Interest Detection
+## Training
+
+Training and Region of Interest Detection
 
 Here are example commands for training the patch classification model and performing ROI detection.
 
