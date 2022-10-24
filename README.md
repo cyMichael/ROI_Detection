@@ -1,6 +1,6 @@
 # Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images [![Open in Visual Studio Code](vscode.svg)](https://code.visualstudio.com/)
 
-[<img src="TCGA1.gif" width="470px" align="left" />](https://github.com/cyMichael/ROI_Detection)Model: **PCLA-3C**.
+[<img src="TCGA1.gif" width="450px" align="left" />](https://github.com/cyMichael/ROI_Detection)Model: **PCLA-3C**.
 
 Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images. 
 
@@ -48,7 +48,7 @@ You need to generate a CSV file that contains 'slide_id', 'data_split', and 'lab
 
 Here are example commands for training the patch classification model and performing ROI detection.
 
-#### Train Patch Classification Model (PCLA-3C)
+### Train Patch Classification Model (PCLA-3C)
 
 Step 0: color normalization.
 
@@ -88,7 +88,7 @@ python analysis.py --results_dir RESULT_TO_CSV --csv_dir PATH_TO_CSV
 
 Here are some examples of the melanoma sample and nevus sample.
 
-#### Visualization results for a melanoma sample.
+### Visualization results for a melanoma sample.
 
 ![plot](./visual_examples/mela_con.png)
 
@@ -101,8 +101,7 @@ Here are some examples of the melanoma sample and nevus sample.
 ![plot](./visual_examples/mela_over.png)
 
 <center>Overlay<center>
-
-#### Visualization results for a nevus sample.
+### Visualization results for a nevus sample.
 
 ![plot](./visual_examples/nev_con.png)
 
