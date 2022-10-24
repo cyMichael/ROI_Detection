@@ -6,6 +6,10 @@ Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whol
 
 - See some downsampled visualization results on TCGA-SKCM in folder [tcga_visual](/tcga_visual). Full-size samples on TCGA-SKCM will be made available via google drive after review later.
 
+[<img src="TCGA1.mp4" width="470px" align="left" />](https://github.com/cyMichael/ROI_Detection)
+
+[Overview](#Overview)•[Setup](#Setup)••••
+
 ## Overview
 
 Automated region of interest detection in histopathological image analysis is a challenging and important topic with tremendous potential impact on clinical practice. The deep-learning methods used in computational pathology help us to reduce costs and increase the speed and accuracy of regions of interest detection and cancer diagnosis. In this work, we proposed a patch-based region of interest detection method for melanocytic skin tumor whole-slide images. We worked with a dataset that contains 165 primary *melanomas* and *nevi* Hematoxylin and Eosin whole-slide images and built a deep-learning method. The proposed method performed well on a hold-out test dataset including five TCGA-SKCM slides (accuracy of 93.94% in the slide classification task and intersection over union rate of 41.27% in the region of interest detection task), showing the outstanding performance of our model on melanocytic skin tumor. Even though we tested the experiments on the skin tumor dataset, our work could also be extended to other medical image detection problems, such as various tumors' classification and prediction, to benefit the clinical evaluation and diagnosis of different tumors.
