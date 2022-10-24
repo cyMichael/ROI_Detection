@@ -6,7 +6,7 @@ Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whol
 
 - See some downsampled visualization results on TCGA-SKCM in folder [tcga_visual](/tcga_visual). Full-size samples on TCGA-SKCM will be made available via google drive after review later.
 
-[<img src="TCGA1.mp4" width="470px" align="left" />](https://github.com/cyMichael/ROI_Detection)
+[<img src="TCGA1.gif" width="470px" align="left" />](https://github.com/cyMichael/ROI_Detection)
 
 [Overview](#Overview)•[Setup](#Setup)••••
 
