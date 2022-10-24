@@ -1,8 +1,8 @@
 # Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images [![Open in Visual Studio Code](vscode.svg)](https://code.visualstudio.com/)
 
-[<img src="TCGA1.gif" width="420px" align="left" />](https://github.com/cyMichael/ROI_Detection)Model: **PCLA-3C**.
+[<img src="TCGA1.gif" width="420px" align="left" />](https://github.com/cyMichael/ROI_Detection)
 
-Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images. 
+Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images. (Model: **PCLA-3C**).
 
 ## Updates
 
