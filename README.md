@@ -25,6 +25,8 @@ Here is the flowchart for our paper:
 ![plot](./flowchart/flowchart.png)
 
 <center>Overview of the proposed detection framework. a) Extract melanoma, nevus and other patches from training data. b) Train a 3-class patch classifier based on extracted patches. c) For each slide, generate predicted scores for all patches and calculate patch as well as slide classification accuracy. d) Rank all patches from a slide based on the corresponding predicted scores in the context of melanoma or nevus, depending on the slide classification result. e) Generate visualization results based on predicted scores.<center>
+
+
 ## Setup
 
 ### 1. Computational Configuration
