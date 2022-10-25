@@ -14,7 +14,7 @@ Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whol
 
 
 
-- Oct 24, 2022: **Extended abstracts** has been accepted by MEDICAL IMAGING MEETS NEURIPS (MED-NEURIPS, 2022). Poster Session.
+- Oct 24, 2022: **Extended abstract** has been accepted by MEDICAL IMAGING MEETS NEURIPS (MED-NEURIPS, 2022). Poster Session.
 
 [Overview](#Overview)•[Setup](#Setup)•[Training](#Training)•[Visualization](#Visualization)•[Reproducibility](#Reproducibility)•[Issues](#Issues)•[Acknowledgments](#Acknowledgments)
 
