@@ -8,9 +8,13 @@ Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whol
 
 - See some downsampled visualization results on TCGA-SKCM in folder [tcga_visual](/tcga_visual). Full-size samples on TCGA-SKCM will be made available via google drive after review later.
 
+[toc]
 
 
-[Overview](#Overview)•[Setup](#Setup)•[Training](#Training)•[Visualization Examples](# Visualization Examples)•[Reproducibility](#Reproducibility)•[Issues](#Issues)•[Acknowledgments](#Acknowledgments)
+
+
+
+[Overview](#Overview)•[Setup](#Setup)•[Training](#Training)•[Visualization](#Visualization)•[Reproducibility](#Reproducibility)•[Issues](#Issues)•[Acknowledgments](#Acknowledgments)
 
 ## Overview
 
@@ -29,14 +33,14 @@ Here is the flowchart for our paper:
 
 ## Setup
 
-### 1. Computational Configuration
+### Computational Configuration
 
 - All analyses were used by Python. Images were analyzed and processed using OpenSlide. 
 - All the computational tasks were finished on UNC Longleaf Cluster with Linux (Tested on Ubuntu 18.04) and NVIDIA GPU (Tested on Nvidia GeForce RTX 3090 on local workstations). 
 - CUDA (Tested on CUDA 11.3).
 - torch>=1.7.1.
 
-### 2. Basic Structure of Codes
+### Basic Structure of Codes
 
 - **extract_patches_3class.py**: extract patches from whole slide images with annotation files (.xml). Split annotated patches into training, testing and validation. 
 - **method_pcla_3class.py**: train patch classification model on annotated patches (PCLA-3C).
