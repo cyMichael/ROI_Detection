@@ -71,7 +71,7 @@ python extract_patches_3class.py --data_dir PATH_TO_SAVE_MEL/PATCHES --csv_path 
 Step 2: train patch classification model (PCLA-3C).
 
 ```python
-python method_pcla_3class.py --exp_name 'pcla_3class' --data_folder PATH_TO_SAVE_FEATURES --batch_size 100 --n_epochs 20
+python method_pcla_3class.py --exp_name 'pcla_3class' --data_folder PATH_TO_SAVE_FEATURES --batch_size BATCH_NUMBER --n_epochs EPOCH_NUMBER
 ```
 
 Step 3: calculate predicted scores for all extracted patches.
@@ -111,6 +111,8 @@ Here are some examples of the melanoma sample and nevus sample.
 ![plot](./visual_examples/mela_over.png)
 
 <center>Overlay<center>
+
+
 ### Visualization results for a nevus sample.
 
 ![plot](./visual_examples/nev_con.png)
@@ -124,6 +126,8 @@ Here are some examples of the melanoma sample and nevus sample.
 ![plot](./visual_examples/nev_over.png)
 
 <center>Overlay<center>
+
+
 ## Reproducibility
 
 The melanocytic skin tumor dataset will be made public in the future. To reproduce the results on the TCGA-SKCM dataset, the pre-trained model is available at the [model]() (for anonymization, the link will be provided after the paper review).
