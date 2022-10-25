@@ -1,4 +1,4 @@
-# Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images [![Open in Visual Studio Code](vscode.svg)](https://code.visualstudio.com/)
+# Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images
 
 [<img src="TCGA1.gif" width="420px" align="left" />](https://github.com/cyMichael/ROI_Detection)
 
