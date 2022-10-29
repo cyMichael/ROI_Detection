@@ -138,6 +138,6 @@ The melanocytic skin tumor dataset will be made public in the future. To reprodu
 
 ## Acknowledgments
 
-- This version is modified by the version from https://github.com/roidetection/roi_detection.
+- This version is modified by the version from [https://github.com/liyao880/roi_detection](https://github.com/liyao880/roi_detection).
 
 - This code of patch extraction is inspired by [CLAM](https://github.com/mahmoodlab/CLAM).
