@@ -1,0 +1,40 @@
+# ROI Detection Pipeline Requirements
+# Core dependencies for the automated pipeline
+
+# Deep Learning Framework
+torch>=1.7.1
+torchvision>=0.8.2
+
+# Image Processing
+opencv-python>=4.5.0
+Pillow>=8.0.0
+pyvips>=2.1.0
+openslide-python>=1.1.2
+
+# Data Processing
+numpy>=1.19.0
+pandas>=1.2.0
+h5py>=3.1.0
+scipy>=1.6.0
+scikit-learn>=0.24.0
+
+# Visualization
+matplotlib>=3.3.0
+seaborn>=0.11.0
+
+# Configuration and Utilities
+PyYAML>=5.4.0
+tqdm>=4.60.0
+pathlib2>=2.3.0
+
+# Clustering and Shape Analysis
+alphashape>=1.3.0
+
+# Optional: TensorBoard for monitoring (uncomment if needed)
+# tensorboard>=2.5.0
+# tensorboardX>=2.4
+
+# Development and Testing (optional)
+# pytest>=6.0.0
+# black>=21.0.0
+# flake8>=3.9.0
