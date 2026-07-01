@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCLA-3C — ROI Detection in Melanocytic Skin Tumor WSIs (Paper + Code Illustration)</title>
+<style>
+  :root {
+    --accent: #7b1e3b;      /* melanoma-ish deep red */
+    --accent2: #1f6f8b;     /* teal */
+    --bg: #ffffff;
+    --fg: #1f2328;
+    --muted: #57606a;
+    --border: #d0d7de;
+    --code-bg: #f6f8fa;
+    --note-bg: #fff8e6;
+    --note-border: #e3b341;
+    --warn-bg: #fff0f0;
+    --warn-border: #d1494b;
+    --sidebar-w: 300px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+  a { color: var(--accent2); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Layout */
+  .layout { display: flex; align-items: flex-start; }
+  nav.toc {
+    position: sticky; top: 0;
+    width: var(--sidebar-w); min-width: var(--sidebar-w);
+    height: 100vh; overflow-y: auto;
+    padding: 24px 18px;
+    border-right: 1px solid var(--border);
+    background: #fafbfc;
+    font-size: 0.9rem;
+  }
+  nav.toc h2 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin: 0 0 10px; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; counter-reset: item; }
+  nav.toc li { margin: 4px 0; }
+  nav.toc a { display: block; padding: 3px 6px; border-radius: 5px; color: var(--fg); }
+  nav.toc a:hover { background: #eef1f4; text-decoration: none; }
+  main { flex: 1; max-width: 900px; padding: 40px 48px 120px; margin: 0 auto; }
+
+  /* Header */
+  header.hero {
+    border-left: 6px solid var(--accent);
+    padding: 8px 0 8px 22px;
+    margin-bottom: 8px;
+  }
+  header.hero .kicker { color: var(--accent); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.78rem; }
+  header.hero h1 { font-size: 1.9rem; line-height: 1.25; margin: 6px 0 10px; }
+  header.hero .sub { color: var(--muted); font-size: 1.02rem; }
+
+  h2 { font-size: 1.5rem; margin-top: 2.2em; padding-bottom: 6px; border-bottom: 2px solid var(--border); }
+  h3 { font-size: 1.18rem; margin-top: 1.6em; color: #24292f; }
+  h4 { font-size: 1.02rem; margin-top: 1.3em; color: var(--accent2); }
+
+  p, li { font-size: 1rem; }
+  code { background: var(--code-bg); padding: 0.12em 0.35em; border-radius: 5px; font-size: 0.88em; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 0.85rem; line-height: 1.45; }
+  pre code { background: none; padding: 0; }
+
+  table { border-collapse: collapse; width: 100%; margin: 1.1em 0; font-size: 0.93rem; }
+  th, td { border: 1px solid var(--border); padding: 8px 11px; text-align: left; vertical-align: top; }
+  th { background: #f1f3f5; font-weight: 700; }
+  tbody tr:nth-child(even) { background: #fbfcfd; }
+  td strong { color: var(--accent); }
+
+  /* Callouts */
+  .callout { border-radius: 8px; padding: 12px 16px; margin: 1.1em 0; border: 1px solid; }
+  .callout.note { background: var(--note-bg); border-color: var(--note-border); }
+  .callout.warn { background: var(--warn-bg); border-color: var(--warn-border); }
+  .callout .label { font-weight: 700; display: block; margin-bottom: 4px; }
+  .callout.note .label { color: #7a5b00; }
+  .callout.warn .label { color: var(--warn-border); }
+
+  /* Equation blocks */
+  .eq { text-align: center; margin: 1.1em 0; font-size: 1.12rem; font-family: "Cambria Math", Georgia, "Times New Roman", serif; }
+  .eq .frac { display: inline-block; vertical-align: middle; text-align: center; margin: 0 0.15em; }
+  .eq .frac .num { display: block; padding: 0 0.4em 2px; border-bottom: 1.5px solid var(--fg); }
+  .eq .frac .den { display: block; padding: 2px 0.4em 0; }
+  .eq var { font-style: italic; }
+  sub, sup { font-size: 0.72em; }
+
+  .tldr { background: linear-gradient(180deg,#fbfdff,#f3f7fb); border: 1px solid var(--border); border-radius: 10px; padding: 6px 22px 14px; }
+  .pill { display: inline-block; background: var(--accent2); color: #fff; border-radius: 999px; padding: 2px 12px; font-size: 0.78rem; font-weight: 600; margin: 2px 4px 2px 0; }
+  .meta-table td:first-child { width: 170px; font-weight: 600; color: var(--muted); }
+  footer { margin-top: 60px; padding-top: 18px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.9rem; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 2.4em 0; }
+  .small { font-size: 0.85rem; color: var(--muted); }
+  @media (max-width: 900px) {
+    nav.toc { display: none; }
+    main { padding: 24px 18px 80px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><a href="#bib">Bibliographic information</a></li>
+    <li><a href="#s1">1. Executive summary</a></li>
+    <li><a href="#s2">2. Clinical background</a></li>
+    <li><a href="#s3">3. Problem definition</a></li>
+    <li><a href="#s4">4. Dataset</a></li>
+    <li><a href="#s5">5. Method: PCLA-3C</a></li>
+    <li><a href="#s6">6. Code walkthrough &amp; mapping</a></li>
+    <li><a href="#s7">7. Results</a></li>
+    <li><a href="#s8">8. Misclassification analysis</a></li>
+    <li><a href="#s9">9. Discussion &amp; limitations</a></li>
+    <li><a href="#s10">10. Reproducibility &amp; environment</a></li>
+    <li><a href="#s11">11. Reconciling reported numbers</a></li>
+    <li><a href="#s12">12. Glossary</a></li>
+    <li><a href="#s13">13. Key references</a></li>
+    <li><a href="#sA">Appendix A. Peer-review clarifications</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="hero">
+  <div class="kicker">Paper + Code Illustration · Computational Pathology</div>
+  <h1>Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images — Nevus and Melanoma</h1>
+  <div class="sub">A detailed, code-grounded illustration of the paper and its accompanying implementation, <strong>PCLA-3C</strong> (Patch CLAssifier, 3-Class).</div>
+</header>
+
+<section id="bib">
+  <h2>Bibliographic information</h2>
+  <table class="meta-table">
+    <tr><td>Title</td><td>Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images—Nevus and Melanoma</td></tr>
+    <tr><td>Authors</td><td>Yi Cui, Yao Li, Jayson R. Miedema, Sharon N. Edmiston, Sherif W. Farag, James Stephen Marron, Nancy E. Thomas</td></tr>
+    <tr><td>Affiliation</td><td>University of North Carolina at Chapel Hill (Economics; Statistics &amp; Operations Research; Pathology &amp; Laboratory Medicine; Lineberger Comprehensive Cancer Center; Eshelman School of Pharmacy; Biostatistics; Dermatology)</td></tr>
+    <tr><td>Venue</td><td><em>Cancers</em> <strong>2024</strong>, <em>16</em>, 2616 (MDPI)</td></tr>
+    <tr><td>DOI</td><td><a href="https://doi.org/10.3390/cancers16152616">10.3390/cancers16152616</a></td></tr>
+    <tr><td>Dates</td><td>Received 29 Jun 2024 · Revised 17 Jul 2024 · Accepted 19 Jul 2024 · Published 23 Jul 2024</td></tr>
+    <tr><td>Model</td><td><strong>PCLA-3C</strong> — Patch CLAssifier, 3-Class</td></tr>
+    <tr><td>Code</td><td><a href="https://github.com/cyMichael/ROI_Detection">github.com/cyMichael/ROI_Detection</a> (this repo is a modified/automated version)</td></tr>
+    <tr><td>License</td><td>MIT (code) · CC BY 4.0 (paper)</td></tr>
+  </table>
+  <div class="callout note"><span class="label">Precursor work (sourced from the code repository; not stated in the paper)</span>An extended abstract of this work was accepted at <em>Medical Imaging Meets NeurIPS (Med-NeurIPS) 2022</em> (Poster Session).</div>
+</section>
+
+<section id="s1">
+  <h2>1. Executive summary</h2>
+  <div class="tldr">
+    <p>The paper tackles two coupled tasks on digitized <strong>H&amp;E whole slide images (WSIs)</strong> of melanocytic skin tumors:</p>
+    <ol>
+      <li><strong>Slide-level classification</strong> — decide whether a slide shows <strong>melanoma</strong> (malignant) or <strong>nevus</strong> (benign).</li>
+      <li><strong>Region-of-interest (ROI) detection</strong> — localize the diagnostically relevant tumor region <em>without</em> requiring exhaustive pixel-level ground truth for training.</li>
+    </ol>
+    <p>The method, <strong>PCLA-3C</strong>, is deliberately simple and patch-based:</p>
+    <ul>
+      <li>Each gigapixel WSI is tiled into non-overlapping <strong>256&nbsp;×&nbsp;256</strong> patches at <strong>20×</strong> magnification.</li>
+      <li>A <strong>VGG16</strong> CNN is fine-tuned as a <strong>3-class patch classifier</strong> over <span class="pill">Melanoma</span><span class="pill">Nevus</span><span class="pill">Other</span>. The "Other" class absorbs non-tumor background, giving a clean ROI signal despite incomplete annotations.</li>
+      <li>At inference, all patches are classified; the slide label is a <strong>majority vote</strong> of melanoma vs. nevus patches (ignoring "Other"). Patches are then <strong>ranked</strong> by the winning class's score to form the predicted ROI.</li>
+      <li>ROI quality is scored by <strong>Intersection over Union (IoU)</strong> against pathologist annotations on a held-out test set.</li>
+    </ul>
+    <p><strong>Principal quantitative results</strong> (26-WSI test set; trained on the full 134-WSI training set):</p>
+    <table>
+      <thead><tr><th>Metric</th><th>PCLA-3C</th><th>CLAM (baseline)</th></tr></thead>
+      <tbody>
+        <tr><td>Patch classification accuracy</td><td><strong>0.892</strong></td><td>— (CLAM does not classify patches)</td></tr>
+        <tr><td>Slide classification accuracy</td><td><strong>0.923</strong></td><td>0.692</td></tr>
+        <tr><td>ROI IoU</td><td><strong>0.382</strong></td><td>0.112</td></tr>
+      </tbody>
+    </table>
+    <p>The central contribution is <strong>exploiting partial annotations (which the authors describe as a semi-supervised setting) together with an explicit background class</strong> to train a patch classifier that yields both accurate slide classification and a usable ROI map — substantially outperforming the state-of-the-art weakly-supervised baseline, <strong>CLAM</strong>, on this diagnostically challenging dataset.</p>
+  </div>
+</section>
+
+<section id="s2">
+  <h2>2. Clinical background and motivation</h2>
+  <p><strong>Why melanocytic tumors matter.</strong> The American Cancer Society projected that in 2022 an estimated <strong>99,780 invasive</strong> and <strong>97,920 in-situ</strong> melanoma cases would be newly diagnosed in the US, with <strong>~7,650 deaths</strong>. The gold standard remains a pathologist's visual assessment of H&amp;E-stained tissue.</p>
+  <p><strong>The diagnostic problem.</strong> The classification of melanocytic tumors is diagnostically challenging: the paper cites literature reporting <strong>25–26% inter-observer discordance</strong> among pathologists for distinguishing benign nevus from malignant melanoma. The clinical consequences are asymmetric: under-diagnosis of melanoma delays surgical excision and adjuvant therapy and thereby risks metastasis, whereas over-diagnosis leads to unnecessary procedures and to toxic adjuvant therapies.</p>
+  <p><strong>The opportunity.</strong> Computational pathology can make assessment faster, cheaper, and more consistent. Prior deep-learning work scored tumor grade, classified histologic patterns, and predicted treatment response — but the authors note that prior skin-cancer literature <strong>did not address ROI detection</strong> for melanocytic tumors and had limited classification accuracy.</p>
+  <p><strong>The goal.</strong> Build a method that both <strong>detects the ROI</strong> (what a pathologist would circle) and <strong>classifies the slide</strong>, leveraging the partial annotations pathologists already produce rather than requiring complete pixel-level labels.</p>
+</section>
+
+<section id="s3">
+  <h2>3. Problem definition</h2>
+  <p>Two outputs are required per WSI:</p>
+  <ul>
+    <li><strong>Slide classification</strong> — <var>ŷ</var> ∈ {Melanoma, Nevus}.</li>
+    <li><strong>ROI mask</strong> <var>B</var> — the set of patches predicted to lie in the diagnostic region, compared against the pathologist-annotated region <var>A</var>.</li>
+  </ul>
+  <p><strong>The supervision challenge.</strong> During training, only <strong>slide-level labels</strong> and <strong>partial ROI annotations</strong> are available. Every training slide has a label, but pathologists annotated only <em>some</em> regions — <strong>not all ROIs were annotated</strong>. An unannotated region may still contain tumor, so naively labeling "everything outside an annotation" as non-tumor would inject label noise.</p>
+  <p><strong>The key idea.</strong> Rather than pixel-level segmentation (which lacks exhaustive labels), PCLA-3C reframes the task as <strong>3-class patch classification</strong>, where a manually curated <strong>"Other"</strong> class supplies clean background examples. Both slide classification and ROI detection then fall out of the same per-patch scores — the paper's "semi-supervised" use of partial annotations.</p>
+</section>
+
+<section id="s4">
+  <h2>4. Dataset: the UNC Melanocytic Tumor Dataset</h2>
+  <table>
+    <tbody>
+      <tr><td><strong>Total WSIs</strong></td><td><strong>160</strong> H&amp;E whole slide images of primary tumors</td></tr>
+      <tr><td><strong>Class balance</strong></td><td><strong>86 melanoma</strong> (malignant) + <strong>74 nevi</strong> (benign)</td></tr>
+      <tr><td><strong>Training set (80%)</strong></td><td><strong>134 WSIs</strong> — 71 melanoma + 63 nevus <span class="small">(per main text)</span></td></tr>
+      <tr><td><strong>Test set (20%)</strong></td><td><strong>26 WSIs</strong> — 15 melanoma + 11 nevus</td></tr>
+      <tr><td><strong>Scanner</strong></td><td>Aperio ScanScope Console, 20× magnification</td></tr>
+      <tr><td><strong>Annotation tool</strong></td><td>Aperio ImageScope Console; boundaries exported as <strong>XML</strong> with region vertex coordinates</td></tr>
+      <tr><td><strong>Test annotations</strong></td><td>All 26 test slides annotated by an expert dermatopathologist (PAG — Pamela A. Groben)</td></tr>
+      <tr><td><strong>Ethics</strong></td><td>UNC Chapel Hill IRB #22-0611; waiver of informed consent [45 CFR 46.116(d)] and HIPAA authorization [45 CFR 164.512(i)(2)(ii)]</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Effective data size.</strong> Only 160 slides exist, but each gigapixel WSI yields <strong>thousands of patches</strong>, so the effective training set is <strong>hundreds of thousands of patches</strong> — enough for CNN training and better within-slide generalization.</p>
+  <div class="callout note"><span class="label">Critical design point — train/test annotation asymmetry</span>
+    <strong>Training slides</strong> were used <strong>without complete annotations</strong> (only partial regions), mirroring real clinical practice. <strong>Test slides</strong> were kept <strong>with true, complete annotations</strong>, so both slide classification and IoU are evaluated trustworthily. The model never sees complete detection labels, yet is measured against them.</div>
+</section>
+
+<section id="s5">
+  <h2>5. Method: the PCLA-3C framework</h2>
+  <p>The framework (Figure 2 of the paper) has a <strong>Training</strong> stage and a <strong>Testing</strong> stage. Each step's code location appears in <a href="#s6">Section 6</a>.</p>
+
+  <h3>5.1 Preprocessing: color normalization</h3>
+  <p>Scans vary in color across labs and even across time within one lab; a CNN may exploit these spurious differences rather than genuine tissue morphology. All WSIs are therefore <strong>color-normalized</strong> into a common space using the two established stain-normalization methods the paper cites: Ruifrok &amp; Johnston color deconvolution [28] and Macenko et al. [29].</p>
+
+  <p>Both methods rest on the <strong>Beer–Lambert law</strong>. For incident light of intensity <var>I</var><sub>0</sub> transmitted through stained tissue at measured intensity <var>I</var> (per RGB channel), the <strong>optical density (OD)</strong> is</p>
+  <div class="eq"><span class="frac"><span class="num">OD = −log<sub>10</sub>(<var>I</var> / <var>I</var><sub>0</sub>)</span></span></div>
+  <p>and OD is <strong>linearly proportional to stain concentration</strong>: each stain has a characteristic, constant absorption (OD) signature across the three RGB channels. This linearity is what makes the stains separable.</p>
+  <p><strong>Ruifrok &amp; Johnston [28] — color deconvolution (fixed stain vectors).</strong> The specimen is modeled as a mixture of up to three stains (for H&amp;E: hematoxylin, eosin, and a residual/background channel).</p>
+  <ol>
+    <li>Each stain is assigned a normalized OD vector — its RGB color signature — originally measured from control slides stained with a single stain.</li>
+    <li>These vectors are stacked into a <code>3×3</code> <strong>stain matrix</strong> <var>M</var> (one row per stain).</li>
+    <li>For a pixel with measured optical density <var>OD</var>, the relationship is <var>OD</var> = <var>M</var><sup>T</sup><var>c</var>, where <var>c</var> is the vector of per-stain concentrations. Because <var>M</var> is (approximately) invertible, the concentrations are recovered by <strong>deconvolution</strong>, <var>c</var> = (<var>M</var><sup>T</sup>)<sup>−1</sup><var>OD</var>, separating the RGB image into independent per-stain density channels.</li>
+    <li><strong>Normalization</strong> re-projects those concentrations onto a set of <em>reference/standard</em> stain vectors, so slides processed under different conditions share a common stain appearance.</li>
+  </ol>
+  <p><strong>Macenko et al. [29] — automatic, data-driven stain estimation.</strong> Rather than using pre-measured stain vectors, this method estimates them per slide directly from the image:</p>
+  <ol>
+    <li>Convert RGB → OD and discard near-transparent background pixels (OD below a small threshold, e.g. <var>β</var> = 0.15).</li>
+    <li>Because H&amp;E optical-density vectors lie approximately in a <strong>2-D plane</strong>, take the <strong>singular value decomposition (SVD)</strong> of the OD pixel matrix and keep the two directions with the largest singular values — the plane that best explains stain variation.</li>
+    <li>Project pixels onto that plane, compute each pixel's <strong>angle</strong>, and take the <strong>robust extreme angles</strong> (e.g. the 1st and 99th percentiles) as the two stain vectors (hematoxylin and eosin) — estimated automatically, with no control slides.</li>
+    <li>Solve the linear system (non-negative least squares) for the per-pixel stain <strong>concentrations</strong>, and take a robust maximum (e.g. the 99th percentile) as each stain's reference concentration.</li>
+    <li><strong>Normalize</strong> by rescaling every slide's stain concentrations to a chosen <em>target</em> (reference-slide) stain matrix and maximum concentrations, then recompose OD → RGB — mapping all slides into the reference color space, removing inter-scanner and inter-batch variation while preserving morphology.</li>
+  </ol>
+  <p>In this study, one of these normalizations is applied to every WSI before patch extraction, so the downstream VGG16 classifier learns morphology rather than staining artifacts.</p>
+
+  <h3>5.2 Patch extraction and labeling</h3>
+  <ul>
+    <li><strong>Tiling.</strong> Non-overlapping <strong>256×256</strong> patches at 20×; tissue detection first discards empty background.</li>
+    <li><strong>Augmentation.</strong> Random crop, random horizontal flip, and normalization preserve edge features and improve generalization.</li>
+    <li><strong>Labeling rule</strong> (slide label + XML annotations):
+      <ul>
+        <li>Nevus slide → patches <strong>inside</strong> annotations labeled <strong>Nevus</strong>.</li>
+        <li>Melanoma slide → patches <strong>inside</strong> annotations labeled <strong>Melanoma</strong>.</li>
+        <li>Patches <strong>outside</strong> annotations labeled <strong>Other</strong>.</li>
+      </ul>
+    </li>
+    <li><strong>Handling incomplete annotations.</strong> Because not all ROIs were annotated, some tumor patches lie outside annotations and would be wrongly labeled "Other." The authors instead <strong>manually extracted "Other" patches from curated regions</strong> to avoid contaminating the background class.</li>
+  </ul>
+
+  <h3>5.3 Model and training</h3>
+  <ul>
+    <li><strong>Architecture:</strong> <strong>VGG16</strong> [10] base with the final fully connected classification layer replaced by a three-unit output head, fine-tuned by backpropagation.</li>
+    <li><strong>Output:</strong> three per-patch scores (melanoma, nevus, other).</li>
+    <li><strong>Optimization (from the code):</strong> cross-entropy loss, <strong>Adam</strong>, learning rate <strong>5×10⁻⁴</strong>, weight decay <strong>1×10⁻⁴</strong>, <strong>early stopping</strong> (patience 20) on validation loss.</li>
+  </ul>
+
+  <h4>5.3.1 Detailed model architecture (VGG16)</h4>
+  <p>The paper states only that VGG16 is the base and that "the last layer's parameters" were changed; the per-layer specification below follows the canonical <strong>VGG16, configuration "D"</strong> (Simonyan &amp; Zisserman [10]) as instantiated by <code>torchvision</code>. The concrete <code>instantiate_model('vgg16', True, 3)</code> routine is not shown in the released scripts, so the specifics are reconstructed from the paper together with standard torchvision/VGG conventions.</p>
+  <ul>
+    <li><strong>Input.</strong> An RGB patch of <code>224 × 224 × 3</code> during training (after <code>RandomCrop(224, padding=4)</code>) and <code>256 × 256 × 3</code> at inference. Channel-wise normalization uses the <strong>dataset-specific H&amp;E statistics</strong> — mean <code>(0.6632, 0.4123, 0.5529)</code>, std <code>(0.1618, 0.1749, 0.1478)</code> — <strong>not</strong> ImageNet statistics.</li>
+    <li><strong>Feature extractor.</strong> Thirteen <code>3 × 3</code> convolutions (stride 1, padding 1), each followed by ReLU, in five blocks separated by <code>2 × 2</code> max-pooling (stride 2):</li>
+  </ul>
+  <table>
+    <thead><tr><th>Block</th><th>Layers (each <code>Conv 3×3</code> + ReLU)</th><th>Channels</th><th>Spatial output (224 input)</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>Conv, Conv, <strong>MaxPool</strong></td><td>64</td><td>112 × 112</td></tr>
+      <tr><td>2</td><td>Conv, Conv, <strong>MaxPool</strong></td><td>128</td><td>56 × 56</td></tr>
+      <tr><td>3</td><td>Conv, Conv, Conv, <strong>MaxPool</strong></td><td>256</td><td>28 × 28</td></tr>
+      <tr><td>4</td><td>Conv, Conv, Conv, <strong>MaxPool</strong></td><td>512</td><td>14 × 14</td></tr>
+      <tr><td>5</td><td>Conv, Conv, Conv, <strong>MaxPool</strong></td><td>512</td><td>7 × 7</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li><strong>Adaptive pooling.</strong> <code>AdaptiveAvgPool2d((7, 7))</code> fixes the feature map to <code>7 × 7 × 512</code> regardless of input size — precisely why a <code>256 × 256</code> test patch (which pools to <code>8 × 8 × 512</code> before this layer) is accepted despite the <code>224 × 224</code> training crop.</li>
+    <li><strong>Classifier head.</strong> <code>Flatten (25 088) → Linear(25088, 4096) → ReLU → Dropout(0.5) → Linear(4096, 4096) → ReLU → Dropout(0.5) → Linear(4096, 3)</code>. The original ImageNet head's final <code>Linear(4096, 1000)</code> is <strong>replaced by <code>Linear(4096, 3)</code></strong> — the "changed last layer." The three outputs are raw class logits {Melanoma (0), Nevus (1), Other (2)}; no softmax is applied (see §6.2).</li>
+    <li><strong>Depth.</strong> 13 convolutional + 3 fully connected = <strong>16 weight layers</strong> ("VGG-16"). With the 3-way head the network has <strong>≈ 134 million</strong> trainable parameters (vs. ≈ 138 M for the 1000-class original).</li>
+    <li><strong>Transfer learning.</strong> The second argument of <code>instantiate_model('vgg16', True, 3)</code> denotes <strong>ImageNet-pretrained initialization</strong>; the backbone is fine-tuned end-to-end on the H&amp;E patches rather than trained from scratch.</li>
+    <li><strong>Training configuration.</strong> CrossEntropyLoss on the logits; Adam (<code>lr = 5e-4</code>, <code>weight_decay = 1e-4</code>); batch size 100; up to 20 epochs. Note that early-stopping <code>patience = 20</code> <strong>equals</strong> <code>n_epochs = 20</code>, so under the default configuration early stopping can never actually fire — training runs the full 20 epochs and every per-epoch checkpoint is retained for later selection (§6.3).</li>
+  </ul>
+
+  <h3>5.4 Slide classification (testing stage)</h3>
+  <p>All patches of a WSI are classified by taking, for each patch, the class with the highest predicted score (the argmax over the three class scores). <strong>"Other" patches are ignored.</strong> The slide label is a <strong>majority vote</strong>: if #melanoma patches &gt; #nevus patches → <strong>melanoma</strong>, else <strong>nevus</strong> (ties resolved in favor of nevus, consistent with the strict inequality in the code).</p>
+
+  <h3>5.5 ROI ranking and detection</h3>
+  <p>After the slide class is decided, all patches are <strong>ranked by the winning class's score</strong> — by melanoma score for a melanoma slide, by nevus score for a nevus slide. The predicted ROI is the set of top-ranked patches, sized by the annotated ratio <var>β</var>.</p>
+
+  <h3>5.6 The two key metrics: β and IoU</h3>
+  <p><strong>Annotated ratio <var>β</var></strong> — for a slide <var>C</var> with annotated region <var>A</var>:</p>
+  <div class="eq">
+    <var>β</var> =
+    <span class="frac"><span class="num"><var>A</var><sub>p</sub></span><span class="den"><var>C</var><sub>p</sub></span></span>
+  </div>
+  <p>where <var>A</var><sub>p</sub> is the number of patches inside the annotation and <var>C</var><sub>p</sub> is the total number of patches in the slide. Equivalently, <var>β</var> is the proportion of the slide's extracted patches (by patch count, not area) that fall within the pathologist-annotated region.</p>
+  <p><strong>Top-<var>nβ</var> selection.</strong> With <var>n</var> = total patches in the slide, the model designates the <strong>top <var>nβ</var></strong> highest-scoring patches as the predicted ROI <var>B</var>. Example: if <var>β</var> = 0.2, the model predicts its top 20% of patches as ROI.</p>
+  <p><strong>Intersection over Union (IoU)</strong> — patch-counted:</p>
+  <div class="eq">
+    IoU =
+    <span class="frac"><span class="num"><var>AB</var><sub>p</sub> &nbsp;(| <var>A</var> ∩ <var>B</var> |)</span><span class="den"><var>AB</var><sub>p</sub> &nbsp;(| <var>A</var> ∪ <var>B</var> |)</span></span>
+  </div>
+  <p>As implemented in <code>analysis.py</code>:</p>
+  <div class="eq" style="font-size:1rem;">
+    IoU =
+    <span class="frac"><span class="num">num_inregion_highlight</span><span class="den">num_inregion + num_highlight − num_inregion_highlight</span></span>
+  </div>
+  <ul>
+    <li><code>num_inregion</code> = patches inside the annotation (|<var>A</var>|).</li>
+    <li><code>num_highlight</code> = patches predicted as ROI (|<var>B</var>|).</li>
+    <li><code>num_inregion_highlight</code> = patches both inside and predicted (|<var>A</var> ∩ <var>B</var>|).</li>
+  </ul>
+
+  <h3>5.7 Visualization (three map types)</h3>
+  <ol>
+    <li><strong>Overlay map.</strong> Highlights top-ranked patches, masks the rest with a <strong>transparent blue</strong> tint. When ground-truth XML is available the threshold is set from <var>β</var> (via <code>get_percent</code>); with <code>--no_xml</code> it falls back to <code>--percent</code> (default 0.2). The highlighted fraction is therefore <em>approximately</em> <var>β</var> (owing to the per-class-threshold and argmax gating of §6.2), so the highlighted region closely approximates the predicted ROI.</li>
+    <li><strong>Boundary map.</strong> Draws the boundary of the <strong>largest ROI cluster</strong>. Highlighted patches are grouped with the <strong>OPTICS</strong> density-based clustering algorithm [30]; the largest cluster's outline is rendered via an alpha-shape hull — showing how precisely tumor margins are captured.</li>
+    <li><strong>Heatmap.</strong> A continuous <strong>color gradient</strong> (matplotlib <code>coolwarm</code>): <strong>red = high</strong> predicted score, <strong>blue = low</strong> — conveying model confidence across the slide.</li>
+  </ol>
+  <p>Figure 1 of the paper shows the goal: the pathologist's ROI (black dots) on the left, reproduced as PCLA-3C's green boundary on the right.</p>
+</section>
+
+<section id="s6">
+  <h2>6. The code: repository walkthrough and paper-to-code mapping</h2>
+
+  <h3>6.1 Repository layout</h3>
+<pre><code>understand-deeplearningproject/
+├── paper/cancers-16-02616.pdf     # the paper
+└── codes/                         # all source; run commands from here
+    ├── extract_patches_3class.py  # Stage 1: patch extraction + labeling
+    ├── method_pcla_3class.py      # Stage 2: train VGG16 3-class classifier
+    ├── score_pcla_3class.py       # Stage 3: score all patches, slide classification
+    ├── visual.py                  # Stage 4: overlay / boundary / heatmap
+    ├── analysis.py                # Stage 5: IoU computation
+    ├── automated_pipeline.py      # config-driven orchestrator (subprocess wrapper)
+    ├── batch_process.py           # run the pipeline over multiple configs
+    ├── config.yaml / config_example.yaml
+    ├── setup.py / requirements.txt
+    └── utils/                     # CLAM-derived helpers (not referenced by the active pipeline)</code></pre>
+  <p>Each stage is an independent argparse script; stages communicate only through files on disk (patch PNGs, HDF5 score files, text logs, CSVs).</p>
+
+  <h3>6.2 The five-stage pipeline</h3>
+
+  <h4>Stage 1 — <code>extract_patches_3class.py</code> (patch extraction &amp; labeling)</h4>
+  <p>Implements §5.2. Key functions:</p>
+  <ul>
+    <li><code>makemask(w, h, xml_path)</code> — parses the Aperio XML, iterates each <code>&lt;Region&gt;</code>'s <code>&lt;Vertex&gt;</code> coordinates, and rasterizes the polygons into a binary mask via <code>cv2.fillPoly</code>. This is the code realization of the annotated region <var>A</var>. Note that <code>makemask()</code> exists in <strong>both</strong> <code>extract_patches_3class.py</code> and <code>visual.py</code> with different internal conventions: the extraction copy allocates <code>np.zeros((h, w))</code> and is called <code>makemask(w, h, ...)</code>, whereas the visual copy allocates <code>np.zeros((w, h))</code> but is called <code>makemask(image.height, image.width, ...)</code>; both yield a (height × width) mask, but the parameter order and names differ.</li>
+    <li><code>checkinout(patch_mask, annotation_ratio=1.00)</code> — a patch is <em>in-region</em> if the fraction of annotated pixels meets the ratio. Extraction is effectively hardcoded to <code>1.00</code>: <code>compute_w_loader</code> calls <code>checkinout(img_mask)</code> without passing <code>annotation_ratio</code>, so the <code>config.yaml</code> value <code>annotation_ratio=0.5</code> affects only <code>visual.py</code>, not extraction.</li>
+    <li><code>compute_w_loader(...)</code> — iterates patch coords from the slide's HDF5 bag, checks each against the mask, and saves in-region patches as PNGs named <code>{output}_{x}_{y}.png</code> (coordinates encoded in the filename).</li>
+    <li><code>make_dirs(...)</code> — builds the <code>feat_dir/{train,val,test}/{Melanoma,Nevi,Other}/</code> tree the trainer consumes.</li>
+  </ul>
+  <p>The two annotation sources map to the labeling rule: <code>--xml_annotation_new</code> sets the Melanoma/Nevus label for in-region patches, while <code>--xml_annotation_other</code> routes patches into the manually curated <strong>Other</strong> class.</p>
+
+  <h4>Stage 2 — <code>method_pcla_3class.py</code> (train PCLA-3C)</h4>
+  <ul>
+    <li>Loads patches with <code>torchvision.datasets.ImageFolder</code>. Alphabetical class indexing gives <strong>{Melanoma: 0, Nevi: 1, Other: 2}</strong> — consistent with later decision logic.</li>
+    <li><strong>Train transform:</strong> <code>RandomCrop(224, padding=4)</code> → <code>RandomHorizontalFlip</code> → <code>ToTensor</code> → <code>Normalize(mean=(0.6632, 0.4123, 0.5529), std=(0.1618, 0.1749, 0.1478))</code>. (Note: 224-px training crop vs. full 256-px test patches; VGG16's adaptive pooling accepts both.)</li>
+    <li><strong>Model:</strong> <code>instantiate_model('vgg16', True, num_class=3)</code>.</li>
+    <li><strong>Loop:</strong> cross-entropy, Adam (<code>lr=5e-4</code>, <code>weight_decay=1e-4</code>), validation each epoch, early stopping (<code>patience=20</code>). Checkpoints saved as <code>{exp_name}_epoch{N}_loss{L}_acc{A}.pt</code>; the accuracy token records per-epoch <em>training</em> accuracy and is later parsed to auto-select a checkpoint.</li>
+  </ul>
+
+  <h4>Stage 3 — <code>score_pcla_3class.py</code> (score patches, slide classification)</h4>
+  <ul>
+    <li>Loads each slide's patches from <code>{slide_id}.h5</code>, runs the model, and accumulates <code>class_mel</code> (argmax==0) and <code>class_nev</code> (argmax==1).</li>
+    <li><strong>Slide label = majority vote:</strong> <code>label = 0</code> (melanoma) if <code>class_mel &gt; class_nev</code> else <code>1</code> (nevus) — §5.4 in code. <code>check_correct</code> encodes Melanoma↔0 / Nevi↔1 to tally slide accuracy.</li>
+    <li><strong>Per-slide output</strong> <code>results_dir/{exp_name}/score/{slide_id}.h5</code> with datasets <code>scores</code> (raw 3-class logits), <code>coord</code> (patch coordinates), <code>pred</code> (slide label). These files feed visualization and analysis. <strong>No softmax is applied anywhere in the pipeline:</strong> <code>ScoreToColor</code>, <code>get_thrd</code>, and <code>ScoreToRank</code> all threshold or rank these raw per-class logits (the <code>visual.py</code> variables named <code>probs</code>/<code>prob0</code>/<code>prob1</code> are logits, not probabilities).</li>
+    <li>Writes <code>classification_{exp_name}.csv</code>, whose <code>classification_result</code> column is recomputed independently from the counts as <code>Melanoma</code> if <code>mel_con &gt; nev_con</code> else <code>nevi</code> (note the lowercase <code>nevi</code>; ties fall to <code>nevi</code>), and prints overall slide accuracy. Normalization mean/std arrive via <code>--mean1..3</code>/<code>--std1..3</code> flags (from <code>config.yaml</code>) and must be kept in sync with the training values.</li>
+  </ul>
+
+  <h4>Stage 4 — <code>visual.py</code> (overlay, boundary, heatmap)</h4>
+  <ul>
+    <li><code>get_percent(...)</code> computes <var>β</var> from the ground-truth mask (fraction of in-region patches) — the code form of <var>β</var> = <var>A</var><sub>p</sub>/<var>C</var><sub>p</sub>.</li>
+    <li><code>get_thrd(probs, percent)</code> computes a per-class percentile threshold at the <code>100 − percent·100</code> percentile (<code>thrd0</code> on the melanoma logit, <code>thrd1</code> on the nevus logit) — <em>approximately</em> selecting the <strong>top <var>nβ</var></strong> patches.</li>
+    <li><code>ScoreToColor(...)</code> (overlay/boundary) highlights a patch only when its winning-class logit exceeds that per-class threshold <em>and</em> its argmax agrees with the slide label; because of the extra argmax gate, the highlighted set is <em>at most</em> the top <var>nβ</var> patches. It returns a discrete decision (0 = highlight-melanoma, 1 = highlight-nevus, −1 = not highlighted), whereas <code>ScoreToRank(...)</code> (heatmap) returns a continuous min–max-normalized percentile rank mapped to a <code>coolwarm</code> color.</li>
+    <li><strong>Overlay:</strong> masks the slide with transparent blue (<code>plt.cm.coolwarm(0.05, alpha=0.5)</code>), reveals only highlighted patches, and logs per-slide <code>num_inregion_highlight</code>, <code>num_inregion</code>, <code>num_highlight</code> to <code>{exp_name}.txt</code> — exactly the counts IoU needs.</li>
+    <li><strong>Boundary:</strong> clusters highlighted patches with <code>sklearn.cluster.OPTICS</code>, keeps the largest cluster, fits an <code>alphashape</code> hull, draws the green contour with <code>cv2.drawContours</code>.</li>
+    <li><strong>Heatmap:</strong> blends the colored score map with the slide (<code>original_image * 0.5 + heatmap_image * 0.5</code>).</li>
+    <li>Outputs are pyramidal <code>.tiff</code> written with <strong>pyvips</strong> for WSI-scale rendering.</li>
+  </ul>
+
+  <h4>Stage 5 — <code>analysis.py</code> (IoU)</h4>
+  <p>Parses the <code>{exp_name}.txt</code> log and computes, per slide,</p>
+<pre><code>union = num_inregion + num_highlight − num_inregion_highlight
+IoU   = num_inregion_highlight / union</code></pre>
+  <p>skipping slides with zero in-region patches, and writes <code>summary_iou_final.csv</code>. (It hardcodes reading a label file <code>melanomal.csv</code> and a single experiment name <code>pcla_3class</code>.)</p>
+
+  <h3>6.3 Orchestration layer</h3>
+  <ul>
+    <li><strong><code>automated_pipeline.py</code></strong> — <code>ROIDetectionPipeline</code> reads <code>config.yaml</code> and runs all five stages via <code>subprocess</code>, mapping config keys to CLI flags. It <strong>skips</strong> stages whose outputs exist (<code>skip_existing</code>) and <strong>auto-selects a checkpoint</strong> by parsing the <code>_acc</code> filename token (the highest <em>training</em>-accuracy checkpoint, not necessarily the best-validation model). <code>--validate-only</code> checks the config without running.</li>
+    <li><strong><code>batch_process.py</code></strong> — runs the pipeline once per <code>config_*.yaml</code> in a directory and prints a pass/fail summary.</li>
+    <li><strong><code>config.yaml</code></strong> — single source of truth (architecture; <code>batch_size=100</code>; <code>n_epochs=20</code>; <code>learning_rate=5e-4</code>; <code>patch_size=256</code>; <code>annotation_ratio=0.5</code>; <code>percent=0.2</code>; normalization mean/std). The validator rejects any path still set to a <code>PATH_TO_*</code> placeholder.</li>
+  </ul>
+
+  <h3>6.4 Paper → code mapping (quick reference)</h3>
+  <table>
+    <thead><tr><th>Paper concept</th><th>Code location</th></tr></thead>
+    <tbody>
+      <tr><td>Color normalization (§5.1)</td><td>Not in repo (external "Step 0")</td></tr>
+      <tr><td>Tiling into 256×256 patches</td><td>HDF5 bags via <code>h5_to_patch_new</code></td></tr>
+      <tr><td>Annotation mask <var>A</var> from XML</td><td><code>makemask()</code> + <code>cv2.fillPoly</code></td></tr>
+      <tr><td>In-region test (annotation ratio)</td><td><code>checkinout()</code></td></tr>
+      <tr><td>Patch labels {Melanoma, Nevi, Other}</td><td><code>make_dirs()</code> + <code>--xml_annotation_new/other</code></td></tr>
+      <tr><td>VGG16 3-class classifier (§5.3)</td><td><code>method_pcla_3class.py</code></td></tr>
+      <tr><td>Data augmentation</td><td><code>RandomCrop/RandomHorizontalFlip/Normalize</code></td></tr>
+      <tr><td>Slide classification by majority vote (§5.4)</td><td><code>class_mel &gt; class_nev</code> in <code>score_pcla_3class.py</code></td></tr>
+      <tr><td>Patch ranking by winning-class score (§5.5)</td><td><code>ScoreToColor</code>/<code>ScoreToRank</code> in <code>visual.py</code></td></tr>
+      <tr><td>Annotated ratio <var>β</var> = <var>A</var><sub>p</sub>/<var>C</var><sub>p</sub></td><td><code>get_percent()</code> in <code>visual.py</code></td></tr>
+      <tr><td>Top-<var>nβ</var> selection</td><td><code>get_thrd()</code> percentile threshold</td></tr>
+      <tr><td>IoU (§5.6)</td><td><code>analysis.py</code></td></tr>
+      <tr><td>Overlay / Boundary / Heatmap (§5.7)</td><td><code>visual.py</code> (<code>--</code>/<code>--boundary</code>/<code>--heatmap</code>)</td></tr>
+      <tr><td>OPTICS clustering for boundary</td><td><code>sklearn.cluster.OPTICS</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="s7">
+  <h2>7. Results</h2>
+
+  <h3>7.1 Method comparison — full training set (Table 1)</h3>
+  <table>
+    <thead><tr><th>Evaluation metric</th><th>PCLA-3C</th><th>CLAM</th></tr></thead>
+    <tbody>
+      <tr><td>Patch classification accuracy</td><td><strong>0.892</strong></td><td>— (CLAM does not classify patches)</td></tr>
+      <tr><td>Slide classification accuracy</td><td><strong>0.923</strong></td><td>0.692</td></tr>
+      <tr><td>IoU</td><td><strong>0.382</strong></td><td>0.112</td></tr>
+    </tbody>
+  </table>
+  <p>PCLA-3C raises slide classification accuracy from 69.2% to 92.3% and IoU from 0.112 to 0.382, a more than threefold increase in ROI overlap relative to CLAM.</p>
+  <p><strong>Comparison protocol.</strong> Both methods were trained on the identical 134-WSI split and evaluated on the identical 26-WSI test set. CLAM is <em>label-free</em> (slide labels only), whereas PCLA-3C additionally consumes the pathologists' <em>partial</em> ROI annotations; the comparison is therefore best read as quantifying the value that those partial annotations add, rather than as an architecture-only contest (see Reviewer 1 in <code>reply_to_reviewer.md</code>).</p>
+
+  <h3>7.2 Confusion matrix (Table 2)</h3>
+  <p>The paper designates <strong>nevi as positive</strong> and <strong>melanoma as negative</strong>, reflecting the clinical priority of correctly identifying benign cases.</p>
+  <table>
+    <thead><tr><th></th><th>True: Nevi</th><th>True: Melanoma</th></tr></thead>
+    <tbody>
+      <tr><th>Predicted: Nevi</th><td>20</td><td>0</td></tr>
+      <tr><th>Predicted: Melanoma</th><td>2</td><td>9</td></tr>
+    </tbody>
+  </table>
+  <p>Reported summary metrics: <strong>accuracy 93.5%</strong>, <strong>sensitivity 81.8%</strong>, <strong>specificity 100%</strong>. The reported specificity of 100% indicates that no malignant case was misclassified as benign on this test set, a property of particular clinical importance given the asymmetric cost of under-diagnosis. (See <a href="#s11">Section 11</a> for a note reconciling these counts with the 26-slide test set.)</p>
+
+  <h3>7.3 Robustness across training-set subsampling (Table 3)</h3>
+  <p>The model was retrained on random <strong>subsets</strong> (20/40/60/80%) while the <strong>test set stayed fixed</strong>. CLAM has no patch-classification row. Values are <strong>mean [95% CI]</strong>.</p>
+  <table>
+    <thead><tr><th>Split</th><th>Method</th><th>Patch acc.</th><th>Slide acc.</th><th>IoU</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="2"><strong>20%</strong></td><td>PCLA-3C</td><td>0.6397 [0.5193, 0.7601]</td><td>0.7406 [0.6627, 0.8185]</td><td>0.3026 [0.2394, 0.3327]</td></tr>
+      <tr><td>CLAM</td><td>—</td><td>0.6710 [0.6386, 0.7033]</td><td>0.0427 [0.0342, 0.0512]</td></tr>
+      <tr><td rowspan="2"><strong>40%</strong></td><td>PCLA-3C</td><td>0.7887 [0.7536, 0.8238]</td><td>0.8430 [0.8043, 0.8817]</td><td>0.3402 [0.3057, 0.3784]</td></tr>
+      <tr><td>CLAM</td><td>—</td><td>0.6976 [0.6619, 0.7333]</td><td>0.0524 [0.0297, 0.0751]</td></tr>
+      <tr><td rowspan="2"><strong>60%</strong></td><td>PCLA-3C</td><td>0.8191 [0.7766, 0.8616]</td><td>0.8721 [0.8458, 0.8985]</td><td>0.3652 [0.3369, 0.3934]</td></tr>
+      <tr><td>CLAM</td><td>—</td><td>0.7097 [0.6830, 0.7364]</td><td>0.0621 [0.0428, 0.0814]</td></tr>
+      <tr><td rowspan="2"><strong>80%</strong></td><td>PCLA-3C</td><td>0.8210 [0.7949, 0.8471]</td><td>0.8885 [0.8607, 0.9163]</td><td>0.3710 [0.3335, 0.4084]</td></tr>
+      <tr><td>CLAM</td><td>—</td><td>0.7258 [0.7117, 0.7399]</td><td>0.1103 [0.0529, 0.1677]</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Interpretation.</strong> PCLA-3C exhibits a gradual, monotonic decline in performance as the training set is reduced: even at a <strong>20%</strong> subset its IoU (0.30) already <strong>exceeds CLAM's best</strong> (0.11, at the 80% subset), and slide classification accuracy increases monotonically with training-set size (0.74 → 0.89). The paper also reports, at 80% (107 WSIs), a patch-level accuracy of <strong>0.7866 [0.761, 0.813]</strong> and slide-level accuracy of <strong>0.885 [0.857, 0.914]</strong>. The consistent margin over CLAM across all subsampling levels indicates that combining partial annotations with an explicit background class is the principal source of the improvement, and that PCLA-3C is comparatively data-efficient and robust.</p>
+</section>
+
+<section id="s8">
+  <h2>8. Misclassification analysis</h2>
+  <p>PCLA-3C misclassified <strong>only two slides</strong> — both <strong>true nevi predicted as melanoma</strong>:</p>
+  <ul>
+    <li><strong>Figure 4 case</strong> — <em>not a typical nevus</em>: features of a <strong>pigmented spindle cell nevus</strong>, a recognized diagnostic challenge that is hard even for experts.</li>
+    <li><strong>Figure 5 case</strong> — a <strong>routine nevus</strong> misled by <strong>color</strong>: melanoma ROIs are generally dark and nevus regions light, but this slide had dark areas <em>outside</em> the annotated ROI, pushing the model toward a melanoma prediction and an incorrect ROI.</li>
+  </ul>
+  <p>The analysis explicitly acknowledges this limitation: the model can be confounded by staining and darkness cues and by rare morphological variants — the same cases that challenge human readers.</p>
+</section>
+
+<section id="s9">
+  <h2>9. Discussion, related work, and limitations</h2>
+  <h3>9.1 Positioning against related work</h3>
+  <ul>
+    <li><strong>CLAM</strong> [31] (clustering-constrained attention MIL; Lu et al., <em>Nat. Biomed. Eng.</em> 2021) is the primary baseline — strong on renal/lung cancer but with <strong>unsatisfactory ROI detection on melanocytic tumors</strong>, motivating PCLA-3C.</li>
+    <li><strong>CNN classifiers</strong> for breast/skin cancer [13–16, 37, 38] mostly do classification only; PCLA-3C adds ROI detection with higher accuracy.</li>
+    <li><strong>Transformers</strong> — Feng et al.'s <strong>T2Net</strong> [34] (MRI reconstruction/super-resolution) and Wang et al.'s <strong>TED-Net</strong> [35] (low-dose CT denoising), plus transfer-learning skin classifiers (Khalid et al. [36]) — cited as complementary directions.</li>
+    <li><strong>Weakly-supervised segmentation</strong> — Lerousseau et al.'s <strong>WMIL</strong> [39] generates patch pseudo-labels from slide labels, highlighted as a promising future avenue.</li>
+  </ul>
+  <h3>9.2 Strengths (in detail)</h3>
+  <ol>
+    <li><strong>Detection without complete labels — the central novelty.</strong> PCLA-3C learns ROI localization from <em>partial</em> annotations plus a manually curated <strong>"Other" background class</strong>, rather than from exhaustive pixel/patch masks (which do not exist for this cohort). This addresses the defining obstacle in melanocytic pathology: exhaustive annotation is infeasible and the ground truth is itself uncertain given the documented <strong>25–26% inter-pathologist discordance</strong> [40].</li>
+    <li><strong>One model, two tasks.</strong> Slide classification (majority vote over patch predictions) and ROI localization (ranking patches by winning-class score) both emerge from the <em>same</em> patch classifier — no separate detector or segmentation head.</li>
+    <li><strong>Large margin over the state-of-the-art baseline.</strong> On the fixed 26-WSI test set, slide accuracy improves 0.692 → <strong>0.923</strong> and IoU 0.112 → <strong>0.382</strong> (a more than threefold gain in ROI overlap) relative to CLAM.</li>
+    <li><strong>Data efficiency and robustness.</strong> In Table 3, PCLA-3C trained on only <strong>20%</strong> of the data already surpasses CLAM's <em>best</em> IoU (at 80%), and accuracy/IoU improve monotonically with data, with comparatively tight 95% CIs.</li>
+    <li><strong>Clinically aligned evaluation.</strong> With <strong>nevi as the positive class</strong>, the <strong>100% specificity</strong> means no malignant case in the test set was labeled benign — the error direction that matters most clinically.</li>
+    <li><strong>Interpretability.</strong> Three visualization modes (overlay, boundary, heatmap) give spatially grounded, human-readable explanations of <em>where</em> the model sees tumor, supporting review and trust.</li>
+    <li><strong>Accessibility.</strong> A VGG16 patch classifier runs on a single RTX 3090 and is compatible with open tooling such as FastPathology — a low barrier to reproduction and deployment.</li>
+  </ol>
+  <h3>9.3 Weaknesses (in detail)</h3>
+  <ol>
+    <li><strong>Not autonomous.</strong> Slide-classification accuracy is <strong>92.3%</strong>, so the model cannot replace a pathologist; two true nevi were classified as melanoma. It is framed as decision support.</li>
+    <li><strong>Residual color/stain confounding.</strong> Even after color normalization, dark tissue <em>outside</em> the annotated ROI can bias the model toward "melanoma" (Figure 5), because melanoma regions are typically darker than nevi.</li>
+    <li><strong>Small, single-institution cohort.</strong> Only <strong>160 WSIs</strong> from one institution (UNC), with <strong>26 test slides</strong> and no external, multi-scanner validation in the published work; generalization is unproven.</li>
+    <li><strong>Annotation and curation dependence.</strong> Gains rely on the partial annotations, and the <strong>"Other"-class curation is manual</strong> and not fully specified, limiting exact reproducibility; performance degrades as training data shrinks.</li>
+    <li><strong>Dated backbone with no domain pretraining.</strong> VGG16 (2014) predates modern vision Transformers and pathology <strong>foundation models</strong>, and is initialized from ImageNet rather than self-supervised pathology pretraining, bounding its representational power (see §9.5).</li>
+    <li><strong>No slide-level context.</strong> Patches are classified <strong>independently</strong>; no inter-patch or global-slide context is modeled (unlike attention-MIL or slide encoders), which can fragment the predicted ROI.</li>
+    <li><strong>Evaluation coupling.</strong> IoU is computed at the ground-truth annotated ratio <var>β</var> (which sizes the prediction), and ranking uses raw logits with a per-class-threshold-plus-argmax gate — defensible, but to keep in mind when comparing protocols.</li>
+  </ol>
+  <h3>9.4 Conclusions and future work</h3>
+  <p>The framework produces an <strong>accurate and robust</strong> approach to detect skin tumors and predict tumor type, which the authors suggest could reduce clinician workload and improve diagnostic efficiency. The authors anticipate that the approach may <strong>generalize to other cancers</strong> and to vision-based treatment-outcome prediction. <strong>Future work stated in the paper:</strong> extract richer WSI information and incorporate <strong>extra modalities (gene expression, clinical data)</strong> to further improve detection and prediction.</p>
+
+  <h3>9.5 Beyond the paper: post-2024 medical-imaging models and how they could extend PCLA-3C</h3>
+  <p>The most impactful development since this paper is the arrival of <strong>pathology foundation models</strong> and <strong>promptable segmentation models</strong>. The VGG16 patch classifier is the natural component to modernize; the 2024 models below are the leading candidates, with their architectures summarized.</p>
+  <ul>
+    <li><strong>UNI</strong> (Chen et al., <em>Nature Medicine</em> 2024) — a general-purpose <strong>tile encoder</strong>. Architecture: a <strong>Vision Transformer, ViT-Large/16</strong> (~307 M params) pretrained with the <strong>DINOv2</strong> self-supervised objective on <em>Mass-100K</em> (~100 M H&amp;E tiles from ~100,000 WSIs across 20 tissue types); emits a 1024-dim embedding per 256×256 tile. <em>Extension:</em> replace the VGG16 backbone with a frozen/lightly-tuned UNI encoder and train only a small 3-class head — typically far higher accuracy and data efficiency than an ImageNet CNN.</li>
+    <li><strong>Virchow / Virchow2</strong> (Paige, 2024) — a large pathology tile encoder. Architecture: a <strong>ViT-Huge/14</strong> (~632 M params) trained with <strong>DINOv2</strong> on ~1.5 M WSIs (billions of tiles); Virchow2 adds pathology-specific augmentations and multi-magnification training. <em>Extension:</em> a stronger drop-in patch encoder where compute permits.</li>
+    <li><strong>Prov-GigaPath</strong> (Xu et al., <em>Nature</em> 2024) — a <strong>whole-slide</strong> foundation model supplying the slide-level context PCLA-3C lacks. Architecture: <strong>(i)</strong> a ViT <strong>tile encoder</strong> (DINOv2) over 256×256 tiles, then <strong>(ii)</strong> a <strong>slide encoder built on LongNet</strong>, a Transformer with <em>dilated attention</em> scaling to tens of thousands of tiles per gigapixel slide; pretrained on ~1.3 B tiles from ~171,000 WSIs. <em>Extension:</em> a LongNet-style aggregator would let the model reason about global slide layout instead of voting over independent patches.</li>
+    <li><strong>MedSAM</strong> (Ma et al., <em>Nature Communications</em> 2024) — the medical <strong>Segment Anything Model</strong>, directly relevant to ROI <em>detection</em>. Architecture: a <strong>ViT-Base image encoder</strong>, a <strong>prompt encoder</strong> (bounding-box prompts), and a <strong>lightweight transformer mask decoder</strong> with transposed-convolution upsampling; trained on ~1.5 M image–mask pairs across ~10 modalities. <em>Extension:</em> PCLA-3C's coarse patch ROI could seed box prompts for MedSAM to produce a <strong>pixel-precise</strong> boundary, improving IoU beyond the patch grid.</li>
+    <li><strong>CONCH</strong> (Lu et al., <em>Nature Medicine</em> 2024) — a <strong>vision–language</strong> pathology model. Architecture: a <strong>CoCa</strong>-style dual encoder (ViT image encoder + text encoder) trained with contrastive and image-captioning objectives on ~1.17 M pathology image–caption pairs. <em>Extension:</em> enables <strong>zero-shot / text-promptable</strong> classification and report-style outputs, reducing dependence on curated patch labels.</li>
+  </ul>
+  <p><strong>Synthesis for future work.</strong> A modern successor to PCLA-3C would (a) swap VGG16 for a <strong>DINOv2-pretrained pathology tile encoder</strong> (UNI or Virchow2), (b) add a <strong>slide-level LongNet aggregator</strong> (Prov-GigaPath) for global context, and (c) refine the coarse patch ROI into a precise boundary with a <strong>promptable segmenter</strong> (MedSAM) — while retaining this paper's key insight that <em>partial annotations plus an explicit background class</em> are enough to supervise ROI detection.</p>
+</section>
+
+<section id="s10">
+  <h2>10. Reproducibility and computational environment</h2>
+  <table>
+    <tbody>
+      <tr><td><strong>Language</strong></td><td>Python</td></tr>
+      <tr><td><strong>Image I/O</strong></td><td>OpenSlide (read <code>.svs</code>); pyvips/libvips (write pyramidal <code>.tiff</code>)</td></tr>
+      <tr><td><strong>DL framework</strong></td><td>PyTorch ≥ 1.7.1, torchvision</td></tr>
+      <tr><td><strong>Hardware</strong></td><td>UNC Longleaf Cluster (Linux; tested on Ubuntu 18.04); NVIDIA GeForce RTX 3090 on local workstations</td></tr>
+      <tr><td><strong>CUDA</strong></td><td>Tested on CUDA 11.3</td></tr>
+      <tr><td><strong>Complementary tool</strong></td><td>FastPathology [32] — acknowledged as a user-friendly platform compatible with the Python framework</td></tr>
+      <tr><td><strong>Data availability</strong></td><td>From the corresponding author on reasonable request; a robust methylation classifier reference dataset is cited [41]</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Typical run order</strong> (from <code>codes/</code>, once the <code>models/</code> and <code>datasets/</code> helper packages are on the <code>PYTHONPATH</code> and a color-normalized dataset is available):</p>
+<pre><code>1. python extract_patches_3class.py --data_dir ... --csv_path ... \
+      --xml_annotation_new ... --xml_annotation_other ... --feat_dir ...
+2. python method_pcla_3class.py --exp_name pcla_3class \
+      --data_folder &lt;feat_dir&gt; --batch_size 100 --n_epochs 20
+3. python score_pcla_3class.py --exp_name pcla_3class --model_load &lt;ckpt&gt; \
+      --csv_path ... --patch_path ... --results_dir ... --classification_save_dir ...
+4. python visual.py --exp_name pcla_3class --csv_path ... --wsi_dir ... \
+      --results_dir ... --xml_dir ... [--heatmap|--boundary] --percent 0.2
+5. python analysis.py --results_dir &lt;results_dir&gt;/pcla_3class --csv_dir &lt;dir with melanomal.csv&gt;</code></pre>
+  <p>Or run everything via the orchestrator: <code>python automated_pipeline.py --config config.yaml</code> (use <code>--validate-only</code> first).</p>
+  <p class="small"><strong>Metadata CSV contract:</strong> columns <code>slide_id</code>, <code>data_split</code> (train/val/test), <code>label_name</code> (Melanoma/Nevi/Other). WSIs are <code>.svs</code>; per-slide patch bags are <code>.h5</code> keyed by <code>slide_id</code>.</p>
+</section>
+
+<section id="s11">
+  <h2>11. Reconciling the reported numbers</h2>
+  <p>For a fully faithful reading, a few figures in the paper do not perfectly reconcile with one another. These are noted for the careful reader; none change the paper's conclusions.</p>
+  <ul>
+    <li><strong>160 vs. 165 WSIs.</strong> The paper consistently states <strong>160 WSIs</strong> (86 + 74). The repository README's overview mentions <strong>165</strong> — treat <strong>160</strong> as authoritative.</li>
+    <li><strong>Training-set composition.</strong> The main text gives <strong>71 melanoma + 63 nevus = 134</strong> and test <strong>15 + 11 = 26</strong> (self-consistent with 86/74). Figure 2a's <em>panel</em> labels the training set "Melanoma 67, Nevus 57" (sums to 124) — the <strong>main-text 71/63</strong> numbers are the consistent ones.</li>
+    <li><strong>Confusion-matrix totals vs. 26-slide test set.</strong> Table 2's cells (20 / 0 / 2 / 9) sum to <strong>31</strong> and give <strong>93.5%</strong>, whereas the headline slide accuracy is <strong>92.3%</strong> (i.e. <strong>24 of 26</strong>, with exactly <strong>2 nevi misclassified as melanoma</strong>). The 2-false-melanoma count is consistent throughout; the absolute cell counts / 93.5% do not fully reconcile with 26 slides. The <strong>92.3% / 24-of-26 / 2-misclassified</strong> framing is the internally consistent one. (The companion <code>reply_to_reviewer.md</code>, Reviewer 2, presents a corrected confusion matrix that sums to 26 and matches 92.3%.)</li>
+  </ul>
+</section>
+
+<section id="s12">
+  <h2>12. Glossary and abbreviations</h2>
+  <table>
+    <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><strong>H&amp;E</strong></td><td>Hematoxylin and eosin — the standard histology stain</td></tr>
+      <tr><td><strong>WSI</strong></td><td>Whole slide image — a gigapixel digitized microscope slide</td></tr>
+      <tr><td><strong>ROI</strong></td><td>Region of interest — the diagnostically relevant tumor region</td></tr>
+      <tr><td><strong>CNN</strong></td><td>Convolutional neural network</td></tr>
+      <tr><td><strong>Patch</strong></td><td>A small fixed-size tile (256×256 px here) cut from a WSI</td></tr>
+      <tr><td><strong>Nevus (pl. nevi)</strong></td><td>Benign melanocytic tumor (mole)</td></tr>
+      <tr><td><strong>Melanoma</strong></td><td>Malignant melanocytic tumor (skin cancer)</td></tr>
+      <tr><td><strong>PCLA-3C</strong></td><td>The proposed 3-class patch classifier</td></tr>
+      <tr><td><strong>CLAM</strong></td><td>Clustering-constrained attention multiple-instance learning (baseline)</td></tr>
+      <tr><td><strong>IoU</strong></td><td>Intersection over Union — overlap metric for detection</td></tr>
+      <tr><td><strong>β (annotated ratio)</strong></td><td>Fraction of a slide's patches inside the annotation</td></tr>
+      <tr><td><strong>OPTICS</strong></td><td>Ordering Points To Identify the Clustering Structure — density-based clustering</td></tr>
+      <tr><td><strong>MIL / WMIL</strong></td><td>(Weakly-supervised) multiple-instance learning</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="s13">
+  <h2>13. Key references</h2>
+  <p>Selected references cited here (numbering follows the paper):</p>
+  <ul>
+    <li><strong>[10]</strong> Simonyan, K.; Zisserman, A. <em>Very Deep Convolutional Networks for Large-Scale Image Recognition</em> (VGG). ICLR 2015.</li>
+    <li><strong>[28]</strong> Ruifrok, A.C.; Johnston, D.A. <em>Quantification of Histochemical Staining by Color Deconvolution.</em> Anal. Quant. Cytol. Histol. 2001.</li>
+    <li><strong>[29]</strong> Macenko, M. et al. <em>A Method for Normalizing Histology Slides for Quantitative Analysis.</em> IEEE ISBI 2009.</li>
+    <li><strong>[30]</strong> Ankerst, M.; Breunig, M.M.; Kriegel, H.P.; Sander, J. <em>OPTICS: Ordering Points to Identify the Clustering Structure.</em> SIGMOD 1999.</li>
+    <li><strong>[31]</strong> Lu, M.Y. et al. <em>Data-efficient and weakly supervised computational pathology on whole-slide images</em> (<strong>CLAM</strong>). Nat. Biomed. Eng. 2021.</li>
+    <li><strong>[32]</strong> Pedersen, A. et al. <em>FastPathology.</em> IEEE Access 2021.</li>
+    <li><strong>[39]</strong> Lerousseau, M. et al. <em>Weakly Supervised Multiple Instance Learning Histopathological Tumor Segmentation</em> (<strong>WMIL</strong>). MICCAI 2020.</li>
+    <li><strong>[40]</strong> Hekler, A. et al. <em>Pathologist-level classification of histopathological melanoma images with deep neural networks.</em> Eur. J. Cancer 2019.</li>
+  </ul>
+  <p class="small">The full reference list (41 entries) is in the paper, pages 11–12.</p>
+</section>
+
+<section id="sA">
+  <h2>Appendix A. Peer-review clarifications</h2>
+  <p>A companion document, <code>reply_to_reviewer.md</code>, gives point-by-point responses to three <em>Cancers</em> reviewers. The substantive points relevant to this explainer are summarized below:</p>
+  <ul>
+    <li><strong>Reviewer 1 (ML methodology).</strong> Requested a full architecture specification (addressed in <a href="#s5">§5.3.1</a>), clarification of the CLAM comparison protocol (<a href="#s7">§7.1</a>), confirmation that ranking uses raw logits (<a href="#s6">§6.2</a>), and documentation of the "Other"-class curation (<a href="#s5">§5.2</a>).</li>
+    <li><strong>Reviewer 2 (clinical).</strong> Raised single-institution / small-cohort external validity, the Table 2 confusion-matrix inconsistency (<a href="#s11">§11</a>), color/stain confounding (<a href="#s8">§8</a>), and the intended decision-support role.</li>
+    <li><strong>Reviewer 3 (statistics).</strong> Asked for the confidence-interval resampling protocol (<a href="#s7">§7.3</a>), correction of the Figure 2a training-split counts (<a href="#s11">§11</a>), justification of the β-sized top-<var>nβ</var> IoU protocol (<a href="#s5">§5.6</a>), and broader baselines (<a href="#s9">§9.1</a>).</li>
+  </ul>
+</section>
+
+</main>
+</div>
+</body>
+</html>

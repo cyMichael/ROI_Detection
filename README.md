@@ -4,6 +4,10 @@
 
 Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images. (Model: **PCLA-3C**).
 
+## Project Page
+
+The GitHub Pages site for this repository is available at [https://cymichael.github.io/ROI_Detection/](https://cymichael.github.io/ROI_Detection/). It summarizes the paper, highlights the PCLA-3C results, shows representative ROI visualizations, and links to the full code-grounded explainer in [PAPER_EXPLAINED.html](PAPER_EXPLAINED.html) and [PAPER_EXPLAINED.md](PAPER_EXPLAINED.md).
+
 ## Updates
 
 - See some downsampled visualization results on TCGA-SKCM in folder [tcga_visual](/tcga_visual). Full-size samples on TCGA-SKCM will be made available via google drive after review later.
