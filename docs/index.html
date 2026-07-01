@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Project page for PCLA-3C: region-of-interest detection in melanocytic skin tumor whole slide images.">
+  <title>PCLA-3C ROI Detection | Melanocytic Skin Tumor WSIs</title>
+  <style>
+    :root {
+      --ink: #172026;
+      --muted: #53606a;
+      --paper: #fbfaf8;
+      --panel: #ffffff;
+      --line: #d9e0e4;
+      --red: #7a1838;
+      --teal: #176b70;
+      --gold: #b2761b;
+      --green: #2f6f4e;
+      --blue: #2f5f8f;
+      --shadow: 0 18px 48px rgba(23, 32, 38, 0.13);
+      --radius: 8px;
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      line-height: 1.55;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    a {
+      color: var(--teal);
+      text-decoration-thickness: 0.08em;
+      text-underline-offset: 0.16em;
+    }
+
+    a:hover {
+      color: var(--red);
+    }
+
+    .skip-link {
+      position: absolute;
+      left: 16px;
+      top: -48px;
+      z-index: 20;
+      padding: 10px 14px;
+      color: #fff;
+      background: var(--ink);
+      border-radius: var(--radius);
+      transition: top 160ms ease;
+    }
+
+    .skip-link:focus {
+      top: 16px;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(251, 250, 248, 0.95);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+    }
+
+    .nav {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 12px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 43px;
+      height: 15px;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .brand-mark::before {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 15px;
+      height: 15px;
+      content: "";
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 14px 0 0 var(--teal), 28px 0 0 var(--gold);
+    }
+
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px 16px;
+      font-size: 0.92rem;
+    }
+
+    .nav-links a {
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .nav-links a:hover {
+      color: var(--red);
+    }
+
+    .hero {
+      position: relative;
+      isolation: isolate;
+      min-height: 86svh;
+      display: grid;
+      align-items: end;
+      color: #fff;
+      background: url("pics/task.jpg") center / cover no-repeat;
+    }
+
+    .hero::before {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      content: "";
+      background: rgba(10, 15, 18, 0.58);
+    }
+
+    .hero-inner {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+      padding: 13vh 22px 10vh;
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: #f5cf8a;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      overflow-wrap: anywhere;
+    }
+
+    h1 {
+      max-width: 980px;
+      margin: 0;
+      font-size: clamp(2.35rem, 6vw, 5.8rem);
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    .hero-copy {
+      max-width: 790px;
+      margin: 24px 0 0;
+      color: #f4f7f7;
+      font-size: clamp(1.03rem, 1.55vw, 1.32rem);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 10px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.76);
+      border-radius: var(--radius);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.12);
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .button:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .button.primary {
+      color: var(--ink);
+      background: #fff;
+      border-color: #fff;
+    }
+
+    .button.primary:hover {
+      color: var(--ink);
+      background: #f3eadb;
+    }
+
+    main {
+      background: var(--paper);
+    }
+
+    section {
+      padding: 74px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    section.alt {
+      background: #eef4f2;
+    }
+
+    .wrap {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+    }
+
+    .section-head {
+      max-width: 760px;
+      margin-bottom: 30px;
+    }
+
+    .section-kicker {
+      margin: 0 0 9px;
+      color: var(--red);
+      font-size: 0.78rem;
+      font-weight: 850;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 3rem);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .section-head p,
+    .lead {
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .metric {
+      min-height: 154px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--red);
+      font-size: clamp(2.2rem, 4vw, 4rem);
+      line-height: 0.95;
+      letter-spacing: 0;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-weight: 750;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
+      gap: 34px;
+      align-items: start;
+    }
+
+    .panel {
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+
+    .panel h3 {
+      margin: 0 0 12px;
+      font-size: 1.25rem;
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .steps li {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+
+    .step-num {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      color: #fff;
+      background: var(--teal);
+      border-radius: 50%;
+      font-weight: 850;
+    }
+
+    .steps h3 {
+      margin: 0 0 4px;
+      font-size: 1.05rem;
+    }
+
+    .steps p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .figure-frame {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .figure-frame img {
+      width: 100%;
+      height: auto;
+    }
+
+    .caption {
+      margin: 0;
+      padding: 12px 14px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      background: #fff;
+      font-size: 0.92rem;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .gallery .figure-frame img {
+      aspect-ratio: 1.55;
+      object-fit: cover;
+    }
+
+    .code-map {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .code-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+
+    .code-card code {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 3px 6px;
+      color: var(--blue);
+      background: #edf4fa;
+      border-radius: 5px;
+      font-size: 0.82rem;
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .code-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .results-table th,
+    .results-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .results-table th {
+      color: #fff;
+      background: var(--ink);
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .results-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .results-table strong {
+      color: var(--red);
+    }
+
+    .callout {
+      padding: 20px;
+      border-left: 5px solid var(--gold);
+      border-radius: var(--radius);
+      background: #fff8e8;
+    }
+
+    .callout p {
+      margin: 0;
+    }
+
+    .resources {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .resource {
+      min-height: 138px;
+      padding: 18px;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      text-decoration: none;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .resource:hover {
+      color: var(--ink);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .resource strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--teal);
+    }
+
+    .resource span {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    footer {
+      padding: 38px 22px;
+      color: #dbe4e7;
+      background: var(--ink);
+    }
+
+    footer .wrap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    footer a {
+      color: #f4cd81;
+    }
+
+    @media (max-width: 960px) {
+      .site-header {
+        position: static;
+      }
+
+      .nav {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .nav-links {
+        justify-content: flex-start;
+      }
+
+      .hero {
+        min-height: 82svh;
+      }
+
+      .metric-grid,
+      .gallery,
+      .resources {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .code-map {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .brand {
+        white-space: normal;
+      }
+
+      .nav-links {
+        gap: 8px 12px;
+      }
+
+      .hero-inner {
+        padding-top: 9vh;
+        padding-bottom: 7vh;
+      }
+
+      section {
+        padding: 52px 18px;
+      }
+
+      .metric-grid,
+      .gallery,
+      .code-map,
+      .resources {
+        grid-template-columns: 1fr;
+      }
+
+      .steps li {
+        grid-template-columns: 1fr;
+      }
+
+      .results-table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="PCLA-3C project home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>PCLA-3C ROI Detection</span>
+      </a>
+      <div class="nav-links">
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#visuals">Visuals</a>
+        <a href="#code">Code</a>
+        <a href="PAPER_EXPLAINED.html">Full explainer</a>
+        <a href="https://doi.org/10.3390/cancers16152616">Paper</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top" aria-label="Project introduction">
+      <div class="hero-inner">
+        <p class="eyebrow">Computational pathology · Whole slide images · ROI detection</p>
+        <h1>Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images</h1>
+        <p class="hero-copy">
+          PCLA-3C is a patch-based deep learning framework that classifies melanoma versus nevus slides and localizes the diagnostically relevant region using partial pathologist annotations plus an explicit background class.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#results">View results</a>
+          <a class="button" href="PAPER_EXPLAINED.html">Read the code-grounded explainer</a>
+          <a class="button" href="https://github.com/cyMichael/ROI_Detection">Open repository</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="summary">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="section-kicker">The work</p>
+          <h2>One model produces the slide label and the ROI map.</h2>
+          <p>
+            The paper reframes melanocytic tumor ROI detection as 3-class patch classification. A VGG16 model learns Melanoma, Nevus, and Other patches, then uses patch votes for slide diagnosis and winning-class scores to rank patches into a predicted ROI.
+          </p>
+        </div>
+        <div class="metric-grid" aria-label="Headline metrics">
+          <div class="metric">
+            <strong>0.923</strong>
+            <span>slide classification accuracy on the 26-WSI test set</span>
+          </div>
+          <div class="metric">
+            <strong>0.382</strong>
+            <span>ROI IoU, compared with 0.112 for CLAM</span>
+          </div>
+          <div class="metric">
+            <strong>3</strong>
+            <span>patch classes: Melanoma, Nevus, and Other</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt" id="method">
+      <div class="wrap two-col">
+        <div>
+          <div class="section-head">
+            <p class="section-kicker">Method</p>
+            <h2>Partial annotations become a practical training signal.</h2>
+            <p>
+              The central idea is to avoid requiring exhaustive pixel labels. Annotated tumor regions provide positive examples, manually curated background regions provide clean Other examples, and patch-level scores supply both classification and localization.
+            </p>
+          </div>
+          <ol class="steps">
+            <li>
+              <span class="step-num">1</span>
+              <div>
+                <h3>Tile each WSI</h3>
+                <p>Whole slide images are split into non-overlapping 256 x 256 patches at 20x magnification.</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">2</span>
+              <div>
+                <h3>Train PCLA-3C</h3>
+                <p>VGG16 is fine-tuned as a 3-class patch classifier over Melanoma, Nevus, and Other.</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">3</span>
+              <div>
+                <h3>Vote and rank</h3>
+                <p>Patch votes determine the slide label; winning-class scores rank patches into the predicted ROI.</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-num">4</span>
+              <div>
+                <h3>Evaluate overlap</h3>
+                <p>Intersection over Union compares the predicted ROI with pathologist annotations on the held-out test set.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+        <figure class="figure-frame">
+          <img src="flowchart/flowchart.png" alt="PCLA-3C workflow from patch extraction to model scoring and visualization">
+          <figcaption class="caption">Training and testing workflow for the 3-class patch classifier and ROI visualization pipeline.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="results">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="section-kicker">Results</p>
+          <h2>PCLA-3C improves both classification and localization over CLAM.</h2>
+          <p>
+            Both approaches were evaluated on the same held-out test split. PCLA-3C uses partial ROI annotations during training; CLAM is the weakly supervised baseline.
+          </p>
+        </div>
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Evaluation metric</th>
+              <th>PCLA-3C</th>
+              <th>CLAM baseline</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Patch classification accuracy</td>
+              <td><strong>0.892</strong></td>
+              <td>Not applicable</td>
+              <td>CLAM does not assign patch classes; PCLA-3C exposes patch-level evidence.</td>
+            </tr>
+            <tr>
+              <td>Slide classification accuracy</td>
+              <td><strong>0.923</strong></td>
+              <td>0.692</td>
+              <td>Majority vote over tumor-class patches produces the slide diagnosis.</td>
+            </tr>
+            <tr>
+              <td>ROI Intersection over Union</td>
+              <td><strong>0.382</strong></td>
+              <td>0.112</td>
+              <td>Patch scores localize the diagnostic region substantially better than the baseline.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="alt" id="visuals">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="section-kicker">Visual evidence</p>
+          <h2>Boundary, heatmap, and overlay views make the model inspectable.</h2>
+          <p>
+            The repository includes visual examples for melanoma and nevus slides. These are the project page examples from the released codebase.
+          </p>
+        </div>
+        <div class="gallery">
+          <figure class="figure-frame">
+            <img src="visual_examples/mela_con.png" alt="Boundary visualization for a melanoma sample">
+            <figcaption class="caption">Melanoma sample: predicted ROI boundary.</figcaption>
+          </figure>
+          <figure class="figure-frame">
+            <img src="visual_examples/mela_heat.png" alt="Heatmap visualization for a melanoma sample">
+            <figcaption class="caption">Melanoma sample: score heatmap.</figcaption>
+          </figure>
+          <figure class="figure-frame">
+            <img src="visual_examples/mela_over.png" alt="Overlay visualization for a melanoma sample">
+            <figcaption class="caption">Melanoma sample: highlighted ROI overlay.</figcaption>
+          </figure>
+          <figure class="figure-frame">
+            <img src="visual_examples/nev_con.png" alt="Boundary visualization for a nevus sample">
+            <figcaption class="caption">Nevus sample: predicted ROI boundary.</figcaption>
+          </figure>
+          <figure class="figure-frame">
+            <img src="visual_examples/nev_heat.png" alt="Heatmap visualization for a nevus sample">
+            <figcaption class="caption">Nevus sample: score heatmap.</figcaption>
+          </figure>
+          <figure class="figure-frame">
+            <img src="visual_examples/nev_over.png" alt="Overlay visualization for a nevus sample">
+            <figcaption class="caption">Nevus sample: highlighted ROI overlay.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="code">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="section-kicker">Paper to code</p>
+          <h2>The implementation is organized as a five-stage pipeline.</h2>
+          <p>
+            The detailed explainer maps paper concepts to source files, function names, outputs, and implementation caveats. The public page keeps the pipeline easy to scan.
+          </p>
+        </div>
+        <div class="code-map" aria-label="Pipeline source files">
+          <div class="code-card">
+            <code>extract_patches_3class.py</code>
+            <p>Build patch datasets from WSI bags and XML annotations.</p>
+          </div>
+          <div class="code-card">
+            <code>method_pcla_3class.py</code>
+            <p>Train the VGG16 3-class patch classifier.</p>
+          </div>
+          <div class="code-card">
+            <code>score_pcla_3class.py</code>
+            <p>Score patches and classify each slide by majority vote.</p>
+          </div>
+          <div class="code-card">
+            <code>visual.py</code>
+            <p>Create overlay, boundary, and heatmap visualizations.</p>
+          </div>
+          <div class="code-card">
+            <code>analysis.py</code>
+            <p>Compute ROI IoU from visualization counts.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt" id="resources">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="section-kicker">Explore</p>
+          <h2>Read the paper, inspect the code, or open the full explainer.</h2>
+          <p>
+            The explainer files added to this repository are preserved as the technical reference for the GitHub Pages site.
+          </p>
+        </div>
+        <div class="resources">
+          <a class="resource" href="PAPER_EXPLAINED.html">
+            <strong>Full HTML explainer</strong>
+            <span>Long-form paper summary with the codebase mapping.</span>
+          </a>
+          <a class="resource" href="PAPER_EXPLAINED.md">
+            <strong>Markdown explainer</strong>
+            <span>Source version suitable for review and editing.</span>
+          </a>
+          <a class="resource" href="https://doi.org/10.3390/cancers16152616">
+            <strong>Published paper</strong>
+            <span>Cancers 2024 article and DOI record.</span>
+          </a>
+          <a class="resource" href="https://github.com/cyMichael/ROI_Detection">
+            <strong>GitHub repository</strong>
+            <span>Training, scoring, visualization, and automation scripts.</span>
+          </a>
+        </div>
+        <div class="callout" style="margin-top: 22px;">
+          <p><strong>Clinical framing:</strong> this model is decision support, not autonomous diagnosis. The work is valuable because it exposes where the model sees diagnostically relevant tissue while preserving pathologist review.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>Region of Interest Detection in Melanocytic Skin Tumor Whole Slide Images</span>
+      <span><a href="LICENSE">MIT code license</a> · Paper under CC BY 4.0</span>
+    </div>
+  </footer>
+</body>
+</html>
