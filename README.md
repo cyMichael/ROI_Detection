@@ -6,7 +6,7 @@ Codes for the paper: Region of Interest Detection in Melanocytic Skin Tumor Whol
 
 ## Project Page
 
-The GitHub Pages site for this repository is available at [https://cymichael.github.io/ROI_Detection/](https://cymichael.github.io/ROI_Detection/). It summarizes the paper, highlights the PCLA-3C results, shows representative ROI visualizations, and links to the full code-grounded explainer in [docs/PAPER_EXPLAINED.html](docs/PAPER_EXPLAINED.html) and [docs/PAPER_EXPLAINED.md](docs/PAPER_EXPLAINED.md).
+The GitHub Pages site for this repository is available at [https://cymichael.github.io/ROI_Detection/](https://cymichael.github.io/ROI_Detection/). It summarizes the paper, highlights the PCLA-3C results, shows representative ROI visualizations, and links to the full code-grounded explainer.
 
 | | |
 |---|---|
