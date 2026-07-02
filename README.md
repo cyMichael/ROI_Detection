@@ -13,8 +13,6 @@ The GitHub Pages site for this repository is available at [https://cymichael.git
 | **GitHub Pages** | https://cyMichael.github.io/ROI_Detection/ |
 | **Local** | `cd docs && python3 -m http.server 8080` -> http://localhost:8080 |
 
-> Enable Pages under **Settings -> Pages -> Build from branch `main` / `/docs`** if the online link is not live yet.
-
 ## Updates
 
 - See some downsampled visualization results on TCGA-SKCM in folder [tcga_visual](/tcga_visual). Full-size samples on TCGA-SKCM will be made available via google drive after review later.
